@@ -199,7 +199,7 @@ button,input,select,textarea{font-family:inherit}
   <li><span>4</span><div><b data-t="tut_4a"></b><span data-t="tut_4b" style="all:unset"></span></div></li></ol>
   <button class="b pri ok" onclick="hideTut()" data-t="tut_ok">START</button>
 </div></div>
-<div class="upd" id="upd"><span data-t="upd_txt">A new version of UTR Sketch is available.</span><button onclick="location.reload()" data-t="upd_btn">RELOAD</button></div>
+<div class="upd" id="upd"><span data-t="upd_txt">A new version of UTR Sketch is available.</span><button onclick="freshReload()" data-t="upd_btn">RELOAD</button></div>
 
 <script>
 // ---------- testi
@@ -491,9 +491,11 @@ FIELDS.forEach(k=>$(k).addEventListener("input",()=>{save();draw()}));
 window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="1.4 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="1.5 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
+// RICARICA a prova di cache (5 ott 2026, «sul cellulare non si aggiorna»): ricarica con un parametro nuovo, così il browser non ripesca la copia di 10 minuti; senza ?tool la bozza (valori, tratti, dati) si ricarica da sola
+function freshReload(){const u=new URL(location.href);u.searchParams.set("r",Date.now());location.replace(u.toString())}
 async function checkUpdate(){if(!/^https?:$/.test(location.protocol))return;try{const r=await fetch(location.pathname,{cache:"no-store"});const m=(await r.text()).match(/const VERSION="([^"]+)"/);if(m&&m[1]!==VERSION)$("upd").classList.add("on")}catch(e){}}
 // ---------- avvio: indirizzo con parametri > bozza salvata > standard della brochure
 if(!fromUrl()){if(!load()){P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}}
