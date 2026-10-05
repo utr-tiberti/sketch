@@ -151,10 +151,10 @@ button,input,select,textarea{font-family:inherit}
           <div class="full"><label data-t="f_email">E-MAIL</label><input id="f_email" type="email" autocomplete="email"></div>
           <div class="full"><label data-t="f_material">MATERIAL</label>
             <div class="mat"><button type="button" class="mat-btn" id="mat-btn" onclick="toggleMat(event)"></button><div class="mat-list" id="mat-list"></div></div>
-            <input id="f_material" class="hid" placeholder="H11 · H13 · 1.2344 …" style="margin-top:6px"></div>
-          <div><label data-t="f_qty">QUANTITY</label><input id="f_qty" type="number" min="1" step="1" placeholder="1"></div>
-          <div class="full"><label data-t="f_app">APPLICATION</label><input id="f_app" data-ph="f_app_ph"></div>
-          <div class="full"><label data-t="f_note">NOTES</label><textarea id="f_note" data-ph="f_note_ph"></textarea></div>
+            <input id="f_material" class="hid" style="margin-top:6px"></div>
+          <div><label data-t="f_qty">QUANTITY</label><input id="f_qty" type="number" min="1" step="1"></div>
+          <div class="full"><label data-t="f_app">APPLICATION</label><input id="f_app"></div>
+          <div class="full"><label data-t="f_note">NOTES</label><textarea id="f_note"></textarea></div>
         </div>
         <div class="send">
           <button class="b pri" onclick="sendMail()" data-t="send">SEND TO UTR</button>
@@ -182,8 +182,7 @@ const TX={
   h_draw:"YOUR DRAWING · A4 · TRUE PROPORTIONS",h_tool:"TOOL AND UTR STANDARD",h_you:"YOUR DATA",std_lab:"UTR STANDARD · START FROM",
   pen:"DRAW BY HAND",pen_on:"DRAWING… (TAP TO STOP)",undo:"UNDO",clear:"CLEAR",ghost:"SHOW UTR STANDARD",ghost_on:"HIDE UTR STANDARD",reset:"BACK TO STANDARD",
   f_name:"NAME",f_company:"COMPANY",f_email:"E-MAIL",f_material:"MATERIAL",f_qty:"QUANTITY",f_app:"APPLICATION",f_note:"NOTES",
-  f_app_ph:"e.g. aluminium extrusion dies, deep pockets",f_note_ph:"anything else: coating, coolant, deadline…",
-  mat_pick:"Choose the material…",mat_other:"Other material",mat_other_hint:"Type it yourself",mat_other_ph:"e.g. 1.2367 · X38CrMoV5-3",
+  mat_pick:"Choose the material…",mat_other:"Other material",mat_other_hint:"Type it yourself",
   send:"SEND TO UTR",pdf:"PDF",png:"PNG",share:"SHARE",
   send_hint:"SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.",
   country:"Italy",brochure:"UTR DRAWING 04100814 (BROCHURE)",
@@ -197,8 +196,7 @@ const TX={
   h_draw:"IL VOSTRO DISEGNO · A4 · PROPORZIONI REALI",h_tool:"UTENSILE E STANDARD UTR",h_you:"I VOSTRI DATI",std_lab:"STANDARD UTR · PARTITE DA",
   pen:"DISEGNA A MANO",pen_on:"STAI DISEGNANDO… (TOCCA PER FINIRE)",undo:"ANNULLA",clear:"CANCELLA",ghost:"MOSTRA STANDARD UTR",ghost_on:"NASCONDI STANDARD UTR",reset:"TORNA ALLO STANDARD",
   f_name:"NOME",f_company:"AZIENDA",f_email:"E-MAIL",f_material:"MATERIALE",f_qty:"QUANTITÀ",f_app:"APPLICAZIONE",f_note:"NOTE",
-  f_app_ph:"es. matrici per estrusione alluminio, tasche profonde",f_note_ph:"tutto il resto: rivestimento, refrigerante, scadenza…",
-  mat_pick:"Scegliete il materiale…",mat_other:"Altro materiale",mat_other_hint:"Scrivetelo voi",mat_other_ph:"es. 1.2367 · X38CrMoV5-3",
+  mat_pick:"Scegliete il materiale…",mat_other:"Altro materiale",mat_other_hint:"Scrivetelo voi",
   send:"INVIA A UTR",pdf:"PDF",png:"PNG",share:"CONDIVIDI",
   send_hint:"INVIA apre il vostro programma di posta con tutti i valori già scritti. Allegate il PDF o il PNG del disegno.",
   country:"Italia",brochure:"DISEGNO UTR 04100814 (BROCHURE)",
@@ -387,7 +385,7 @@ function resetAll(){setStd(stdIdx)}
 // ---------- utensile, lingua, memoria locale, indirizzo
 function setTool(k,keep){tool=k;$("t-torica").classList.toggle("on",k==="torica");$("t-conica").classList.toggle("on",k==="conica");if(!keep){stdIdx=0;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}buildStd();buildParams();update()}
 function setLang(l){lang=l;$("lang-en").classList.toggle("on",l==="en");$("lang-it").classList.toggle("on",l==="it");document.documentElement.lang=l;
- document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=t(e.dataset.t)});document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));
+ document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=t(e.dataset.t)});
  $("b-pen").textContent=t(penOn?"pen_on":"pen");$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("t-torica").textContent=t("tool_torica");$("t-conica").textContent=t("tool_conica");buildMat();buildStd();buildParams();update()}
 // ---------- materiale: gruppi ISO 513 con i colori delle brochure (P #0071BC, H #8A8D8F) e ISO per gli altri; il valore salvato
 // in f_material è «ISO P · 42CrMo4 · 1.7225 · nome» (si riconosce dal codice al ricaricamento e al cambio lingua)
@@ -408,7 +406,7 @@ const tile=(g,small)=>`<span class="iso ${g}" style="background:${ISO[g].c}">${g
 function buildMat(){const m=matSel();const inp=$("f_material");
  if(m)inp.value=matVal(m);   // nome nella lingua corrente
  $("mat-btn").innerHTML=m?tile(m[0])+`<span class="code">${m[1]}</span><span class="nm">${lang==="it"?m[3]:m[2]}</span><span class="ar">▾</span>`:`<span class="nm">${t(matOther||inp.value.trim()?"mat_other":"mat_pick")}</span><span class="ar">▾</span>`;
- inp.classList.toggle("hid",!!m||!(matOther||inp.value.trim()));inp.placeholder=t("mat_other_ph");
+ inp.classList.toggle("hid",!!m||!(matOther||inp.value.trim()));
  let h="";let g0="";MATS.forEach((x,i)=>{if(x[0]!==g0){g0=x[0];h+=`<div class="mat-grp">${tile(g0)}<span>ISO ${g0} · ${ISO[g0][lang]}</span></div>`}h+=`<div class="mat-row${m===x?" sel":""}" onclick="pickMat(${i})">${tile(x[0])}<b>${x[1]}</b><span>${lang==="it"?x[3]:x[2]}</span></div>`});
  h+=`<div class="mat-grp"><span>${t("mat_other")}</span></div><div class="mat-row${!m&&(matOther||inp.value.trim())?" sel":""}" onclick="pickMat(-1)"><span>${t("mat_other_hint")}</span></div>`;$("mat-list").innerHTML=h}
 function pickMat(i){const inp=$("f_material");if(i>=0){matOther=false;inp.value=matVal(MATS[i])}else{matOther=true;inp.value="";setTimeout(()=>inp.focus(),0)}$("mat-list").classList.remove("on");buildMat();save();draw()}
