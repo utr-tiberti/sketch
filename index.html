@@ -416,7 +416,9 @@ function toggleMat(e){e.stopPropagation();$("mat-list").classList.toggle("on")}
 document.addEventListener("click",e=>{if(!e.target.closest(".mat"))$("mat-list").classList.remove("on")});
 const FIELDS=["f_name","f_company","f_email","f_material","f_qty","f_app","f_note"];
 function save(){try{localStorage.setItem("utr-sketch",JSON.stringify({tool,stdIdx,P,strokes,lang,f:Object.fromEntries(FIELDS.map(k=>[k,$(k).value]))}))}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem("utr-sketch")||"null");if(!d||!TOOLS[d.tool])return false;tool=d.tool;stdIdx=Math.min(d.stdIdx||0,TOOLS[tool].stds.length-1);P=d.P||{};strokes=d.strokes||[];if(d.lang)lang=d.lang;FIELDS.forEach(k=>{if(d.f&&d.f[k]!=null)$(k).value=d.f[k]});return true}catch(e){return false}}
+function load(){try{const d=JSON.parse(localStorage.getItem("utr-sketch")||"null");if(!d||!TOOLS[d.tool])return false;tool=d.tool;stdIdx=Math.max(0,Math.min(parseInt(d.stdIdx)||0,TOOLS[tool].stds.length-1));P=(d.P&&typeof d.P==="object")?d.P:{};
+ strokes=Array.isArray(d.strokes)?d.strokes.filter(x=>Array.isArray(x)&&x.length>1&&x.every(q=>Array.isArray(q)&&isFinite(q[0])&&isFinite(q[1]))).map(x=>x.map(q=>[+q[0],+q[1]])):[];   // bozza corrotta: mai crash (fuzz 5 ott 2026)
+ if(d.lang==="it"||d.lang==="en")lang=d.lang;FIELDS.forEach(k=>{if(d.f&&typeof d.f[k]==="string")$(k).value=d.f[k]});return true}catch(e){return false}}
 function fromUrl(){const u=new URLSearchParams(location.search);if(!u.has("tool")||!TOOLS[u.get("tool")])return false;tool=u.get("tool");const T=TOOLS[tool];stdIdx=0;
  if(u.has("std")){const i=T.stds.findIndex(s=>s.a===u.get("std"));if(i>=0)stdIdx=i}
  P={};T.params.forEach(p=>{P[p[0]]=u.has(p[0])?parseFloat(String(u.get(p[0])).replace(",",".")):STD()[p[0]]});if(u.get("lang"))lang=u.get("lang")==="it"?"it":"en";return true}
