@@ -176,6 +176,7 @@ button,input,select,textarea{font-family:inherit}
           <button class="b pri" onclick="sendMail()" data-t="send">SEND TO UTR</button>
           <button class="b" onclick="printSheet()" data-t="pdf">PDF</button>
           <button class="b" onclick="savePng()" data-t="png">PNG</button>
+          <button class="b" id="b-copy" onclick="copyLink()" data-t="copy">COPY LINK</button>
           <button class="b" id="b-share" onclick="shareIt()" data-t="share" style="display:none">SHARE</button>
         </div>
         <p class="hint" data-t="send_hint">SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.</p>
@@ -215,7 +216,7 @@ const TX={
   tut_3a:"Add a note by hand and your data.",tut_3b:"DRAW BY HAND lets you sketch on the sheet with a finger or the mouse; material, quantity and application go into the sheet notes.",
   tut_4a:"Send it to UTR.",tut_4b:"SEND opens your e-mail with every value and a link to this sketch; PDF and PNG give you the sheet to attach. We take it from there.",
   tut_ok:"START",upd_txt:"A new version of UTR Sketch is available.",upd_btn:"RELOAD",
-  send:"SEND TO UTR",pdf:"PDF",png:"PNG",share:"SHARE",
+  send:"SEND TO UTR",pdf:"PDF",png:"PNG",share:"SHARE",copy:"COPY LINK",copied:"LINK COPIED",copy_hint:"Link to this sketch (every value included): paste it on your PC or send it to a colleague.",
   send_hint:"SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.",
   country:"Italy",brochure:"UTR DRAWING 04100814 (BROCHURE)",
   s_specs:"TOOL SPECS",s_std:"STD",s_you:"YOURS",s_appr:"CUSTOMER APPROVAL",s_date:"DATE",s_sign:"SIGNATURE",s_desc:"DESCRIPTION",s_no:"DRAW NUMBER",s_ys:"YOUR SPECIAL",s_cust:"CUSTOMER",s_std_from:"UTR STANDARD",s_unit:"QUOTE IN MILLIMETERS",s_leg1:"dashed: UTR standard",s_leg2:"blue: your changes",s_notes:"NOTES",
@@ -235,7 +236,7 @@ const TX={
   tut_3a:"Aggiungete una nota a mano e i vostri dati.",tut_3b:"DISEGNA A MANO permette di schizzare sul foglio con il dito o il mouse; materiale, quantità e applicazione finiscono nelle note del foglio.",
   tut_4a:"Inviate a UTR.",tut_4b:"INVIA apre la vostra posta con tutti i valori e il link a questo sketch; PDF e PNG vi danno il foglio da allegare. Al resto pensiamo noi.",
   tut_ok:"INIZIA",upd_txt:"È disponibile una nuova versione di UTR Sketch.",upd_btn:"RICARICA",
-  send:"INVIA A UTR",pdf:"PDF",png:"PNG",share:"CONDIVIDI",
+  send:"INVIA A UTR",pdf:"PDF",png:"PNG",share:"CONDIVIDI",copy:"COPIA LINK",copied:"LINK COPIATO",copy_hint:"Link a questo sketch (con tutti i valori): incollatelo sul PC o mandatelo a un collega.",
   send_hint:"INVIA apre il vostro programma di posta con tutti i valori già scritti. Allegate il PDF o il PNG del disegno.",
   country:"Italia",brochure:"DISEGNO UTR 04100814 (BROCHURE)",
   s_specs:"DATI UTENSILE",s_std:"STD",s_you:"VOSTRO",s_appr:"APPROVAZIONE CLIENTE",s_date:"DATA",s_sign:"FIRMA",s_desc:"DESCRIZIONE",s_no:"N. DISEGNO",s_ys:"IL VOSTRO SPECIALE",s_cust:"CLIENTE",s_std_from:"STANDARD UTR",s_unit:"QUOTE IN MILLIMETRI",s_leg1:"tratteggio: standard UTR",s_leg2:"blu: le vostre modifiche",s_notes:"NOTE",
@@ -480,6 +481,9 @@ const SHEET_CSS="@page{size:A4 landscape;margin:0}html,body{margin:0;padding:0;b
 function sheetXml(){return new XMLSerializer().serializeToString($("svg")).replace(/<\/svg>\s*$/,strokeSvg()+"</svg>").replace(' id="svg"',"")}
 function sheetHtml(){return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><title>UTR Sketch · ${t("s_ys")}</title><style>${SHEET_CSS}</style></head><body>${sheetXml()}</body></html>`}
 function printSheet(){const w=window.open("","_blank");if(!w){window.print();return}w.document.open();w.document.write(sheetHtml());w.document.close();w.focus();setTimeout(()=>{w.print()},500)}
+// COPIA LINK (5 ott 2026): per passare lo sketch dal telefono al PC o a un collega; senza clipboard (http, browser vecchi) mostra il link da copiare
+async function copyLink(){const l=link();const b=$("b-copy");let ok=false;try{await navigator.clipboard.writeText(l);ok=true}catch(e){try{const i=document.createElement("textarea");i.value=l;i.style.position="fixed";i.style.opacity="0";document.body.appendChild(i);i.select();ok=document.execCommand("copy");i.remove()}catch(e2){}}
+ if(ok){b.textContent=t("copied");b.classList.add("on");setTimeout(()=>{b.textContent=t("copy");b.classList.remove("on")},2000)}else{try{window.prompt(t("copy_hint"),l)}catch(e){}}}
 async function savePng(){const b=await render();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="UTR_your_special_"+tool+".png";a.click()}
 async function shareIt(){const b=await render();const f=new File([b],"UTR_your_special_"+tool+".png",{type:"image/png"});const d={files:[f],title:"UTR Sketch",text:summary()};if(navigator.canShare&&navigator.canShare(d))await navigator.share(d).catch(()=>{});else sendMail()}
 if(navigator.canShare)$("b-share").style.display="";
@@ -487,7 +491,7 @@ FIELDS.forEach(k=>$(k).addEventListener("input",()=>{save();draw()}));
 window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="1.2 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="1.3 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 async function checkUpdate(){if(!/^https?:$/.test(location.protocol))return;try{const r=await fetch(location.pathname,{cache:"no-store"});const m=(await r.text()).match(/const VERSION="([^"]+)"/);if(m&&m[1]!==VERSION)$("upd").classList.add("on")}catch(e){}}
