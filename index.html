@@ -69,6 +69,24 @@ button,input,select,textarea{font-family:inherit}
 .form input,.form textarea{width:100%;border:1px solid var(--line);padding:8px;font-size:14px;font-weight:500;color:var(--ink);background:#fff;margin-top:3px}
 .form textarea{min-height:60px;resize:vertical}
 .form .full{grid-column:1/3}
+/* materiale: tendina con la tessera ISO 513 colorata (P blu, M giallo, K rosso, N verde, S arancio, H grigio, come nelle brochure) */
+.iso{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:3px;color:#fff;font-weight:800;font-size:12px;flex:none;letter-spacing:0}
+.iso.M{color:#0A0A0A}
+.mat{position:relative;margin-top:3px}
+.mat-btn{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:6px 8px;font-size:14px;font-weight:500;color:var(--ink);text-align:left;cursor:pointer;min-height:36px}
+.mat-btn .code{font-weight:700}
+.mat-btn .nm{color:var(--mid);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mat-btn .ar{margin-left:auto;color:var(--mid);font-size:11px}
+.mat-list{display:none;position:absolute;left:0;top:100%;z-index:20;width:max(100%,320px);max-height:300px;overflow:auto;background:#fff;border:1px solid var(--navy);box-shadow:0 10px 28px rgba(10,10,10,.16)}
+.mat-list.on{display:block}
+.mat-grp{display:flex;align-items:center;gap:8px;padding:7px 10px 4px;font-size:11px;letter-spacing:.08em;font-weight:700;color:var(--mid);border-top:1px solid var(--grey);background:var(--grey2)}
+.mat-grp:first-child{border-top:0}
+.mat-row{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.mat-row:hover,.mat-row.sel{background:#EEF3F9}
+.mat-row b{font-weight:700;white-space:nowrap}
+.mat-row span{color:var(--mid);font-size:12px}
+.mat-row .iso{width:18px;height:18px;font-size:11px}
+#f_material.hid{display:none}
 .send{padding:12px 14px 14px;display:flex;flex-wrap:wrap;gap:8px}
 .send button{flex:1 1 130px;padding:13px 10px}
 .hint{font-size:12px;color:var(--mid);padding:0 14px 12px;margin:0}
@@ -131,7 +149,9 @@ button,input,select,textarea{font-family:inherit}
           <div><label data-t="f_name">NAME</label><input id="f_name" autocomplete="name"></div>
           <div><label data-t="f_company">COMPANY</label><input id="f_company" autocomplete="organization"></div>
           <div class="full"><label data-t="f_email">E-MAIL</label><input id="f_email" type="email" autocomplete="email"></div>
-          <div><label data-t="f_material">MATERIAL</label><input id="f_material" placeholder="H11 · H13 · 1.2344 …"></div>
+          <div class="full"><label data-t="f_material">MATERIAL</label>
+            <div class="mat"><button type="button" class="mat-btn" id="mat-btn" onclick="toggleMat(event)"></button><div class="mat-list" id="mat-list"></div></div>
+            <input id="f_material" class="hid" placeholder="H11 · H13 · 1.2344 …" style="margin-top:6px"></div>
           <div><label data-t="f_qty">QUANTITY</label><input id="f_qty" type="number" min="1" step="1" placeholder="1"></div>
           <div class="full"><label data-t="f_app">APPLICATION</label><input id="f_app" data-ph="f_app_ph"></div>
           <div class="full"><label data-t="f_note">NOTES</label><textarea id="f_note" data-ph="f_note_ph"></textarea></div>
@@ -163,6 +183,7 @@ const TX={
   pen:"DRAW BY HAND",pen_on:"DRAWING… (TAP TO STOP)",undo:"UNDO",clear:"CLEAR",ghost:"SHOW UTR STANDARD",ghost_on:"HIDE UTR STANDARD",reset:"BACK TO STANDARD",
   f_name:"NAME",f_company:"COMPANY",f_email:"E-MAIL",f_material:"MATERIAL",f_qty:"QUANTITY",f_app:"APPLICATION",f_note:"NOTES",
   f_app_ph:"e.g. aluminium extrusion dies, deep pockets",f_note_ph:"anything else: coating, coolant, deadline…",
+  mat_pick:"Choose the material…",mat_other:"Other material",mat_other_hint:"Type it yourself",mat_other_ph:"e.g. 1.2367 · X38CrMoV5-3",
   send:"SEND TO UTR",pdf:"PDF",png:"PNG",share:"SHARE",
   send_hint:"SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.",
   country:"Italy",brochure:"UTR DRAWING 04100814 (BROCHURE)",
@@ -177,6 +198,7 @@ const TX={
   pen:"DISEGNA A MANO",pen_on:"STAI DISEGNANDO… (TOCCA PER FINIRE)",undo:"ANNULLA",clear:"CANCELLA",ghost:"MOSTRA STANDARD UTR",ghost_on:"NASCONDI STANDARD UTR",reset:"TORNA ALLO STANDARD",
   f_name:"NOME",f_company:"AZIENDA",f_email:"E-MAIL",f_material:"MATERIALE",f_qty:"QUANTITÀ",f_app:"APPLICAZIONE",f_note:"NOTE",
   f_app_ph:"es. matrici per estrusione alluminio, tasche profonde",f_note_ph:"tutto il resto: rivestimento, refrigerante, scadenza…",
+  mat_pick:"Scegliete il materiale…",mat_other:"Altro materiale",mat_other_hint:"Scrivetelo voi",mat_other_ph:"es. 1.2367 · X38CrMoV5-3",
   send:"INVIA A UTR",pdf:"PDF",png:"PNG",share:"CONDIVIDI",
   send_hint:"INVIA apre il vostro programma di posta con tutti i valori già scritti. Allegate il PDF o il PNG del disegno.",
   country:"Italia",brochure:"DISEGNO UTR 04100814 (BROCHURE)",
@@ -330,6 +352,8 @@ function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firs
   leader(X(P.L1-rr*.3),Y(P.D1/2-rr*.3),X(P.L1)+6,top-4,"R"+fmt(P.R),ch("R"));leader(X(xf+P.L2*.5),Y(-(P.D1/2+P.L2*.5*Math.tan(a))),X(xf+P.L2*.5)+8,bot+10,"Z"+P.Z,ch("Z"))}
  // note del cliente (in basso a sinistra)
  const nx=13,ny=170,nw=140,nh=27;rect(g,nx,ny,nw,nh,{s:NAVY,sw:.3});txt(g,nx+1.5,ny+3.6,t("s_notes"),2.2,{w:700,c:NAVY,ls:.2});
+ // tessera ISO 513 del materiale scelto (come nelle brochure) in alto a destra del riquadro NOTE, con il codice del materiale
+ const mg=matGroup();if(mg){const ts=3.6,tx0=nx+nw-1.5-ts;g.appendChild(el("rect",{x:tx0,y:ny+1.2,width:ts,height:ts,rx:ts*.12,fill:ISO[mg].c}));txt(g,tx0+ts/2,ny+1.2+ts*.74,mg,2.5,{a:"middle",w:800,c:mg==="M"?"#0A0A0A":"#fff"});txt(g,tx0-1.5,ny+3.6,"ISO "+mg+" · "+matSel()[1],2.2,{a:"end",w:700,c:NAVY,ls:.1})}
  const notes=[];const who=[$("f_name").value,$("f_company").value,$("f_email").value].map(x=>x.trim()).filter(Boolean).join(" · ");if(who)notes.push(t("s_cust")+": "+who);
  [["f_material"],["f_app"],["f_qty"],["f_note"]].forEach(([k])=>{const vv=$(k).value.trim();if(vv)notes.push(t(k)+": "+vv)});
  wrapLines(notes.join("  ·  "),78).slice(0,6).forEach((l,i)=>txt(g,nx+1.5,ny+8+i*3.6,l,2.5));
@@ -364,7 +388,32 @@ function resetAll(){setStd(stdIdx)}
 function setTool(k,keep){tool=k;$("t-torica").classList.toggle("on",k==="torica");$("t-conica").classList.toggle("on",k==="conica");if(!keep){stdIdx=0;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}buildStd();buildParams();update()}
 function setLang(l){lang=l;$("lang-en").classList.toggle("on",l==="en");$("lang-it").classList.toggle("on",l==="it");document.documentElement.lang=l;
  document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=t(e.dataset.t)});document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));
- $("b-pen").textContent=t(penOn?"pen_on":"pen");$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("t-torica").textContent=t("tool_torica");$("t-conica").textContent=t("tool_conica");buildStd();buildParams();update()}
+ $("b-pen").textContent=t(penOn?"pen_on":"pen");$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("t-torica").textContent=t("tool_torica");$("t-conica").textContent=t("tool_conica");buildMat();buildStd();buildParams();update()}
+// ---------- materiale: gruppi ISO 513 con i colori delle brochure (P #0071BC, H #8A8D8F) e ISO per gli altri; il valore salvato
+// in f_material è «ISO P · 42CrMo4 · 1.7225 · nome» (si riconosce dal codice al ricaricamento e al cambio lingua)
+const ISO={P:{c:"#0071BC",en:"Steels",it:"Acciai"},M:{c:"#F2C400",en:"Stainless steels",it:"Acciai inossidabili"},K:{c:"#E30613",en:"Cast irons",it:"Ghise"},N:{c:"#009640",en:"Non-ferrous metals",it:"Metalli non ferrosi"},S:{c:"#F39200",en:"Superalloys and titanium",it:"Superleghe e titanio"},H:{c:"#8A8D8F",en:"Hardened materials",it:"Materiali temprati"}};
+const MATS=[
+ ["P","C45 · 1.0503","Carbon steel","Acciaio al carbonio"],["P","42CrMo4 · 1.7225","Heat-treatable steel","Acciaio da bonifica"],["P","39NiCrMo3 · 1.6510","Heat-treatable steel","Acciaio da bonifica"],["P","16MnCr5 · 1.7131","Case-hardening steel","Acciaio da cementazione"],
+ ["P","H11 · 1.2343","Hot-work tool steel, annealed","Acciaio per lavorazioni a caldo, ricotto"],["P","H13 · 1.2344","Hot-work tool steel, annealed","Acciaio per lavorazioni a caldo, ricotto"],["P","D2 · 1.2379","Cold-work tool steel, annealed","Acciaio per lavorazioni a freddo, ricotto"],["P","P20 · 1.2311","Plastic mould steel","Acciaio per stampi plastica"],
+ ["M","AISI 304 · 1.4301","Austenitic stainless steel","Inox austenitico"],["M","AISI 316 · 1.4401","Austenitic stainless steel","Inox austenitico"],["M","17-4 PH · 1.4542","Precipitation-hardening stainless steel","Inox indurito per precipitazione"],
+ ["K","EN-GJL-250 · GG25","Grey cast iron","Ghisa grigia"],["K","EN-GJS-400 · GGG40","Nodular cast iron","Ghisa sferoidale"],
+ ["N","EN AW-6082","Wrought aluminium","Alluminio da lavorazione"],["N","EN AW-7075","High-strength aluminium","Alluminio ad alta resistenza"],["N","AlSi9Cu3","Die-cast aluminium","Alluminio pressofuso"],["N","CuZn39Pb3","Brass","Ottone"],["N","Cu-ETP","Copper","Rame"],["N","PA · POM · PEEK","Plastics and composites","Plastiche e compositi"],
+ ["S","Ti6Al4V","Titanium alloy","Lega di titanio"],["S","Inconel 718","Nickel-based superalloy","Superlega a base nichel"],
+ ["H","H13 · 1.2344 · 44–52 HRC","Extrusion die steel, hardened","Acciaio per matrici di estrusione, temprato"],["H","48–55 HRC","Hardened steel","Acciaio temprato"],["H","55–65 HRC","Hardened steel","Acciaio temprato"],["H","EN-GJL · 50 HRC","Chilled cast iron","Ghisa temprata"]];
+let matOther=false;
+const matVal=m=>"ISO "+m[0]+" · "+m[1]+" · "+(lang==="it"?m[3]:m[2]);
+function matSel(){const v=$("f_material").value;return MATS.find(m=>v.startsWith("ISO "+m[0]+" · "+m[1]+" · "))||null}
+function matGroup(){const m=matSel();return m?m[0]:null}
+const tile=(g,small)=>`<span class="iso ${g}" style="background:${ISO[g].c}">${g}</span>`;
+function buildMat(){const m=matSel();const inp=$("f_material");
+ if(m)inp.value=matVal(m);   // nome nella lingua corrente
+ $("mat-btn").innerHTML=m?tile(m[0])+`<span class="code">${m[1]}</span><span class="nm">${lang==="it"?m[3]:m[2]}</span><span class="ar">▾</span>`:`<span class="nm">${t(matOther||inp.value.trim()?"mat_other":"mat_pick")}</span><span class="ar">▾</span>`;
+ inp.classList.toggle("hid",!!m||!(matOther||inp.value.trim()));inp.placeholder=t("mat_other_ph");
+ let h="";let g0="";MATS.forEach((x,i)=>{if(x[0]!==g0){g0=x[0];h+=`<div class="mat-grp">${tile(g0)}<span>ISO ${g0} · ${ISO[g0][lang]}</span></div>`}h+=`<div class="mat-row${m===x?" sel":""}" onclick="pickMat(${i})">${tile(x[0])}<b>${x[1]}</b><span>${lang==="it"?x[3]:x[2]}</span></div>`});
+ h+=`<div class="mat-grp"><span>${t("mat_other")}</span></div><div class="mat-row${!m&&(matOther||inp.value.trim())?" sel":""}" onclick="pickMat(-1)"><span>${t("mat_other_hint")}</span></div>`;$("mat-list").innerHTML=h}
+function pickMat(i){const inp=$("f_material");if(i>=0){matOther=false;inp.value=matVal(MATS[i])}else{matOther=true;inp.value="";setTimeout(()=>inp.focus(),0)}$("mat-list").classList.remove("on");buildMat();save();draw()}
+function toggleMat(e){e.stopPropagation();$("mat-list").classList.toggle("on")}
+document.addEventListener("click",e=>{if(!e.target.closest(".mat"))$("mat-list").classList.remove("on")});
 const FIELDS=["f_name","f_company","f_email","f_material","f_qty","f_app","f_note"];
 function save(){try{localStorage.setItem("utr-sketch",JSON.stringify({tool,stdIdx,P,strokes,lang,f:Object.fromEntries(FIELDS.map(k=>[k,$(k).value]))}))}catch(e){}}
 function load(){try{const d=JSON.parse(localStorage.getItem("utr-sketch")||"null");if(!d||!TOOLS[d.tool])return false;tool=d.tool;stdIdx=Math.min(d.stdIdx||0,TOOLS[tool].stds.length-1);P=d.P||{};strokes=d.strokes||[];if(d.lang)lang=d.lang;FIELDS.forEach(k=>{if(d.f&&d.f[k]!=null)$(k).value=d.f[k]});return true}catch(e){return false}}
