@@ -487,7 +487,7 @@ FIELDS.forEach(k=>$(k).addEventListener("input",()=>{save();draw()}));
 window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="1.1 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="1.2 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 async function checkUpdate(){if(!/^https?:$/.test(location.protocol))return;try{const r=await fetch(location.pathname,{cache:"no-store"});const m=(await r.text()).match(/const VERSION="([^"]+)"/);if(m&&m[1]!==VERSION)$("upd").classList.add("on")}catch(e){}}
@@ -496,6 +496,7 @@ if(!fromUrl()){if(!load()){P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}}
 else{const d=(()=>{try{return JSON.parse(localStorage.getItem("utr-sketch")||"null")}catch(e){return null}})();if(d&&d.f)FIELDS.forEach(k=>{if(d.f[k]!=null)$(k).value=d.f[k]})}
 sanitize();setTool(tool,true);setLang(lang);$("b-ghost").classList.add("on");$("ver").textContent="UTR Sketch v"+VERSION;
 try{if(!localStorage.getItem("utr-sketch-tut"))showTut()}catch(e){}setTimeout(checkUpdate,1500);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});   // anche quando si torna sulla scheda o si riapre dalla Home
 // ?print=1: la pagina diventa il solo foglio (per stampare da riga di comando o da un link)
 if(new URLSearchParams(location.search).has("print")){const xml=sheetXml();document.querySelectorAll("style").forEach(e=>e.remove());document.head.insertAdjacentHTML("beforeend","<style>"+SHEET_CSS+"</style>");document.body.innerHTML=xml}
 </script>
