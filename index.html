@@ -188,7 +188,7 @@ const TX={
   country:"Italy",brochure:"UTR DRAWING 04100814 (BROCHURE)",
   s_specs:"TOOL SPECS",s_std:"STD",s_you:"YOURS",s_appr:"CUSTOMER APPROVAL",s_date:"DATE",s_sign:"SIGNATURE",s_desc:"DESCRIPTION",s_no:"DRAW NUMBER",s_ys:"YOUR SPECIAL",s_cust:"CUSTOMER",s_std_from:"UTR STANDARD",s_unit:"QUOTE IN MILLIMETERS",s_leg1:"dashed: UTR standard",s_leg2:"blue: your changes",s_notes:"NOTES",
   mail_subj:"YOUR SPECIAL · ",mail_intro:"Hello UTR, here is my special tool.",mail_link:"Open this sketch in UTR Sketch:",
-  w_l2:"Flute length L2 cannot exceed the overhang L3.",w_l3:"Overhang L3 must leave at least 10 mm of shank: L3 ≤ L1 − 10.",w_d3:"Neck D3 must be smaller than the tip diameter D1.",w_d3b:"Neck D3 cannot be larger than the shank D2.",w_d12:"Tip diameter D1 larger than the shank D2: unusual, please confirm it in the notes.",w_r:"Corner radius R cannot exceed half the tip diameter.",w_d1:"Tip diameter D1 must be smaller than the shank D2 for a conical tool.",w_cone:"The cone from D1 to D2 at this angle is longer than the tool: reduce L1 or the angle, or raise D1.",
+  w_l2:"Flute length L2 cannot exceed the overhang L3.",w_l2c:"Flute length L2 cannot exceed the taper length L3.",w_l3:"Overhang L3 must leave at least 10 mm of shank: L3 ≤ L1 − 10.",w_d3:"Neck D3 must be smaller than the tip diameter D1.",w_d3b:"Neck D3 cannot be larger than the shank D2.",w_d12:"Tip diameter D1 larger than the shank D2: unusual, please confirm it in the notes.",w_r:"Corner radius R cannot exceed half the tip diameter.",w_d1:"Tip diameter D1 must be smaller than the shank D2 for a conical tool.",w_cone:"The cone from D1 to D2 at this angle is longer than the tool: reduce L1 or the angle, or raise D1.",
   tool_torica:"TORIC HPC ENDMILL Z3",tool_conica:"CONICAL ENDMILL",std:"standard",calc:"calculated",
   d:{D1:"Tip diameter",D2:"Shank diameter",D3:"Neck diameter",L1:"Total length",L2:"Flute length",L3:"Cam overhang",L4:"Shank grip",R:"Corner radius",Z:"Flutes number",A:"Taper angle",L3c:"Taper length"}},
  it:{sub:"IL VOSTRO SPECIALE, IL NOSTRO STANDARD.",claim1:"IL VOSTRO SPECIALE,",claim2:"IL NOSTRO STANDARD.",
@@ -202,7 +202,7 @@ const TX={
   country:"Italia",brochure:"DISEGNO UTR 04100814 (BROCHURE)",
   s_specs:"DATI UTENSILE",s_std:"STD",s_you:"VOSTRO",s_appr:"APPROVAZIONE CLIENTE",s_date:"DATA",s_sign:"FIRMA",s_desc:"DESCRIZIONE",s_no:"N. DISEGNO",s_ys:"IL VOSTRO SPECIALE",s_cust:"CLIENTE",s_std_from:"STANDARD UTR",s_unit:"QUOTE IN MILLIMETRI",s_leg1:"tratteggio: standard UTR",s_leg2:"blu: le vostre modifiche",s_notes:"NOTE",
   mail_subj:"IL VOSTRO SPECIALE · ",mail_intro:"Buongiorno UTR, ecco il mio utensile speciale.",mail_link:"Apri questo sketch in UTR Sketch:",
-  w_l2:"La lunghezza tagliente L2 non può superare la sporgenza L3.",w_l3:"La sporgenza L3 deve lasciare almeno 10 mm di gambo: L3 ≤ L1 − 10.",w_d3:"Il collo D3 deve essere più piccolo del diametro in punta D1.",w_d3b:"Il collo D3 non può essere più grande del gambo D2.",w_d12:"Diametro in punta D1 più grande del gambo D2: insolito, confermatelo nelle note.",w_r:"Il raggio R non può superare metà del diametro in punta.",w_d1:"In una fresa conica il diametro in punta D1 deve essere minore del gambo D2.",w_cone:"Il cono da D1 a D2 con questo angolo è più lungo dell’utensile: ridurre L1 o l’angolo, o aumentare D1.",
+  w_l2:"La lunghezza tagliente L2 non può superare la sporgenza L3.",w_l2c:"La lunghezza tagliente L2 non può superare la lunghezza conica L3.",w_l3:"La sporgenza L3 deve lasciare almeno 10 mm di gambo: L3 ≤ L1 − 10.",w_d3:"Il collo D3 deve essere più piccolo del diametro in punta D1.",w_d3b:"Il collo D3 non può essere più grande del gambo D2.",w_d12:"Diametro in punta D1 più grande del gambo D2: insolito, confermatelo nelle note.",w_r:"Il raggio R non può superare metà del diametro in punta.",w_d1:"In una fresa conica il diametro in punta D1 deve essere minore del gambo D2.",w_cone:"Il cono da D1 a D2 con questo angolo è più lungo dell’utensile: ridurre L1 o l’angolo, o aumentare D1.",
   tool_torica:"FRESA TORICA HPC Z3",tool_conica:"FRESA CONICA",std:"standard",calc:"calcolato",
   d:{D1:"Diametro in punta",D2:"Diametro gambo",D3:"Diametro collo",L1:"Lunghezza totale",L2:"Lunghezza tagliente",L3:"Sporgenza",L4:"Presa del gambo",R:"Raggio sullo spigolo",Z:"Numero taglienti",A:"Angolo di conicità",L3c:"Lunghezza conica"}}
 };
@@ -232,10 +232,12 @@ function stdLabel(s){if(s.b)return t("brochure");return tool==="torica"?`${s.a} 
 // ---------- pannello parametri
 function buildStd(){$("std").innerHTML=T_().stds.map((s,i)=>`<option value="${i}">${stdLabel(s)}</option>`).join("");$("std").value=stdIdx}
 function buildParams(){const h=[];const s=STD();
- T_().params.forEach(([k,mn,mx,st])=>{h.push(`<div class="p" id="p_${k}"><div class="sym">${sym(k)}</div><input type="range" id="r_${k}" min="${mn}" max="${mx}" step="${st}" value="${P[k]}" oninput="setP('${k}',this.value)"><div class="num"><input id="n_${k}" inputmode="decimal" value="${fmt(P[k])}" onchange="setP('${k}',this.value)"><span>${unit(k)}</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("std")} <span class="std" onclick="setP('${k}',${s[k]})">${fmt(s[k])}${unit(k)?" "+unit(k):""}</span></div></div>`)});
+ T_().params.forEach(([k,mn,mx,st])=>{h.push(`<div class="p" id="p_${k}"><div class="sym">${sym(k)}</div><input type="range" id="r_${k}" min="${mn}" max="${mx}" step="${st}" value="${P[k]}" oninput="setP('${k}',this.value)"><div class="num"><input id="n_${k}" inputmode="decimal" value="${fmt(P[k])}" onchange="setP('${k}',this.value)"><span>${unit(k)}</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("std")} <span class="std" onclick="setP('${k}',${s[k]})">${wu(s[k],unit(k))}</span></div></div>`)});
  for(const k in T_().calc)h.push(`<div class="p calc" id="p_${k}"><div class="sym">${sym(k)}</div><div></div><div class="num"><input id="n_${k}" readonly><span>mm</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("calc")}</div></div>`);
  $("params").innerHTML=h.join("")}
-function setP(k,v){v=parseFloat(String(v).replace(",","."));if(isNaN(v))v=P[k];const p=T_().params.find(x=>x[0]===k);v=Math.round(Math.min(p[2],Math.max(p[1],v))*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v;update()}
+function setP(k,v){v=parseFloat(String(v).replace(",","."));if(isNaN(v))v=P[k];const p=T_().params.find(x=>x[0]===k);v=Math.min(p[2],Math.max(p[1],v));v=coneRule(k,v);v=Math.round(v*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v;update()}
+// fresa conica: D1 deve stare sotto D2 (almeno 0,5 mm), altrimenti il cono si rovescia e L3 diventa negativo (bug segnalato 5 ott 2026): il cursore si ferma
+function coneRule(k,v){if(tool!=="conica")return v;if(k==="D1"&&v>P.D2-0.5)v=P.D2-0.5;if(k==="D2"&&v<P.D1+0.5)v=Math.ceil(P.D1+0.5);return v}
 function setStd(i){stdIdx=+i;$("std").value=stdIdx;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]]);buildParams();update()}
 function update(){const v=vals(P),s=STD();
  T_().params.forEach(([k])=>{const r=$("r_"+k),n=$("n_"+k);if(document.activeElement!==r)r.value=P[k];if(document.activeElement!==n)n.value=fmt(P[k]);$("p_"+k).classList.toggle("changed",Math.abs(P[k]-s[k])>1e-9)});
@@ -243,7 +245,7 @@ function update(){const v=vals(P),s=STD();
  warn(v);draw();save()}
 function warn(v){const w=[];
  if(tool==="torica"){if(P.L2>P.L3)w.push(t("w_l2"));if(P.L3>P.L1-10)w.push(t("w_l3"));if(P.D3>P.D1)w.push(t("w_d3"));if(P.D3>P.D2)w.push(t("w_d3b"));if(P.D1>P.D2)w.push(t("w_d12"));if(P.R>P.D1/2)w.push(t("w_r"))}
- else{if(P.D1>=P.D2)w.push(t("w_d1"));if(v.L3c>P.L1-10)w.push(t("w_cone"));if(P.L2>v.L3c)w.push(t("w_l2"));if(P.R>P.D1/2)w.push(t("w_r"))}
+ else{if(P.D1>=P.D2)w.push(t("w_d1"));if(v.L3c>P.L1-10)w.push(t("w_cone"));if(P.L2>v.L3c)w.push(t("w_l2c"));if(P.R>P.D1/2)w.push(t("w_r"))}
  const e=$("warn");e.innerHTML=w.join("<br>");e.classList.toggle("on",w.length>0)}
 
 // ---------- geometria: metà superiore del profilo in mm, da x=0 (fondo gambo) a x=L1 (punta)
@@ -252,7 +254,7 @@ function profile(p){const pts=[];const r=Math.min(p.R,p.D1/2);
   const st=(p.D2-p.D3)/2;pts.push([0,0],[0,p.D2/2-0.4],[0.4,p.D2/2],[L4,p.D2/2],[L4+Math.max(0,st),p.D3/2],[xf,p.D3/2],[xf,p.D1/2],[p.L1-r,p.D1/2]);
   for(let i=1;i<=8;i++){const a=i/8*Math.PI/2;pts.push([p.L1-r+r*Math.sin(a),p.D1/2-r+r*Math.cos(a)])}
   pts.push([p.L1,0]);return pts}
- const L3=(p.D2-p.D1)/(2*Math.tan(p.A*Math.PI/180)),x0=Math.max(0,p.L1-L3),tanA=Math.tan(p.A*Math.PI/180);
+ const L3=Math.max(0,(p.D2-p.D1)/(2*Math.tan(p.A*Math.PI/180))),x0=Math.max(0,p.L1-L3),tanA=Math.tan(p.A*Math.PI/180);
  pts.push([0,0],[0,p.D2/2-0.4],[0.4,p.D2/2],[x0,p.D2/2],[p.L1-r,p.D1/2+r*tanA]);
  for(let i=1;i<=8;i++){const a=i/8*Math.PI/2;pts.push([p.L1-r+r*Math.sin(a),p.D1/2-r+r*Math.cos(a)])}
  pts.push([p.L1,0]);return pts}
@@ -419,7 +421,7 @@ function fromUrl(){const u=new URLSearchParams(location.search);if(!u.has("tool"
  if(u.has("std")){const i=T.stds.findIndex(s=>s.a===u.get("std"));if(i>=0)stdIdx=i}
  P={};T.params.forEach(p=>{P[p[0]]=u.has(p[0])?parseFloat(String(u.get(p[0])).replace(",",".")):STD()[p[0]]});if(u.get("lang"))lang=u.get("lang")==="it"?"it":"en";return true}
 // valori non numerici o fuori dai limiti (indirizzo scritto a mano, bozza di una versione vecchia): si torna allo standard o al limite, mai NaN sul foglio
-function sanitize(){const s=STD();T_().params.forEach(([k,mn,mx])=>{let v=parseFloat(P[k]);if(!isFinite(v))v=s[k];v=Math.round(Math.min(mx,Math.max(mn,v))*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v})}
+function sanitize(){const s=STD();T_().params.forEach(([k,mn,mx])=>{let v=parseFloat(P[k]);if(!isFinite(v))v=s[k];v=Math.round(Math.min(mx,Math.max(mn,v))*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v});if(tool==="conica"&&P.D1>P.D2-0.5)P.D1=Math.max(0.5,Math.round((P.D2-0.5)*10)/10)}
 function link(){const u=new URL(location.href.split("?")[0]);u.searchParams.set("tool",tool);u.searchParams.set("std",STD().a);T_().params.forEach(p=>u.searchParams.set(p[0],P[p[0]]));u.searchParams.set("lang",lang);return u.toString()}
 
 // ---------- invio, PDF, PNG, condivisione
