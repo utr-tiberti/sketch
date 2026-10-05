@@ -367,7 +367,7 @@ function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firs
   g.appendChild(el("path",{d:br,fill:"none",stroke:"#0A0A0A","stroke-width":.18}));
   for(let c=0.4-hr;c<=bl+hr;c+=1.2){let d="",on=false;for(let x=0.4;x<=bl+0.5*hr;x+=0.04){const y=x-c,ok=Math.abs(y)<=hr-0.05&&Math.abs(y)>=dh/2&&x<=xr(y);if(ok){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(y).toFixed(2);on=true}else on=false}if(d)g.appendChild(el("path",{d,fill:"none",stroke:"#0A0A0A","stroke-width":.1}))}
   line(g,X(0),Y(dh/2),X(xr(dh/2)),Y(dh/2),.18);line(g,X(0),Y(-dh/2),X(xr(-dh/2)),Y(-dh/2),.18)}
- else{const helix=(ph,w)=>{let d="",on=false;for(let x=xf;x<=P.L1-rr*.6;x+=0.15){const rad=P.D1/2+(P.L1-x)*Math.tan(P.A*Math.PI/180);const th=2*Math.PI*((x-xf)/pitch+ph);if(Math.cos(th)>0.05){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(rad*Math.sin(th)).toFixed(2);on=true}else on=false}
+ else{const helix=(ph,w)=>{let d="",on=false;for(let x=xf;x<=P.L1-rr*.6;x+=0.15){const rad=Math.min(P.D2/2,P.D1/2+(P.L1-x)*Math.tan(P.A*Math.PI/180));/* mai oltre il gambo: con L2 > L3 le eliche proseguono sul cilindro (5 ott 2026) */const th=2*Math.PI*((x-xf)/pitch+ph);if(Math.cos(th)>0.05){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(rad*Math.sin(th)).toFixed(2);on=true}else on=false}
    if(d)g.appendChild(el("path",{d,fill:"none",stroke:"#0A0A0A","stroke-width":w,"stroke-linecap":"round"}))};
   for(let k=0;k<P.Z;k++){helix(k/P.Z,.4);helix(k/P.Z+0.42/P.Z,.18)}}
  // quote (in mm del foglio): testo 3 mm, frecce 2.2 mm
@@ -491,7 +491,7 @@ FIELDS.forEach(k=>$(k).addEventListener("input",()=>{save();draw()}));
 window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="1.3 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="1.4 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 async function checkUpdate(){if(!/^https?:$/.test(location.protocol))return;try{const r=await fetch(location.pathname,{cache:"no-store"});const m=(await r.text()).match(/const VERSION="([^"]+)"/);if(m&&m[1]!==VERSION)$("upd").classList.add("on")}catch(e){}}
