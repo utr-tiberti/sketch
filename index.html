@@ -89,7 +89,36 @@ button,input,select,textarea{font-family:inherit}
 #f_material.hid{display:none}
 .send{padding:12px 14px 14px;display:flex;flex-wrap:wrap;gap:8px}
 .send button{flex:1 1 130px;padding:13px 10px}
-.hint{font-size:12px;color:var(--mid);padding:0 14px 12px;margin:0}
+.hint{font-size:13px;color:var(--mid);padding:0 14px 12px;margin:0}
+.form h4{grid-column:1/3;margin:6px 0 0;font-size:11px;letter-spacing:.12em;color:var(--navy);font-weight:800;border-top:1px solid var(--grey);padding-top:8px}
+.form h4:first-child{border-top:0;padding-top:0;margin-top:0}
+.form select{width:100%;border:1px solid var(--line);padding:8px;font-size:14px;font-weight:500;color:var(--ink);background:#fff;margin-top:3px}
+.form .cnt{font-size:11px;color:var(--mid);text-align:right;margin-top:2px}
+.form .cnt.over{color:#B3261E;font-weight:700}
+.priv{font-size:12px;color:var(--mid);padding:0 14px 14px;margin:0}
+.priv button{font:600 12px inherit;border:0;background:none;color:var(--navy);text-decoration:underline;cursor:pointer;padding:0}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;z-index:45;background:var(--ink);color:#fff;padding:10px 12px 10px 16px;font-size:13px;font-weight:600;display:none;align-items:center;gap:12px;max-width:calc(100% - 32px);box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.toast.on{display:flex}
+.toast button{font:700 12px/1 inherit;letter-spacing:.06em;padding:8px 10px;border:1px solid #fff;background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap}
+.dlg{display:none;position:fixed;inset:0;z-index:55;background:rgba(10,10,10,.55);padding:16px;overflow:auto}
+.dlg.on{display:flex;align-items:flex-start;justify-content:center}
+.dlg .card{max-width:560px;width:100%;padding:18px 20px 16px;border:2px solid var(--navy);margin:auto 0}
+.dlg h3{margin:0 0 10px;font-size:20px;font-weight:800}
+.dlg .chk{margin:0 0 12px;padding:9px 12px;font-size:13px;border-left:3px solid #B3261E;background:#FBEDEC}
+.dlg .chk.ok{border-left-color:var(--navy);background:var(--grey2)}
+.dlg ol{margin:0;padding:0;list-style:none}
+.dlg li{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--grey);font-size:14px}
+.dlg li>span{width:30px;height:30px;background:var(--navy);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.dlg li p{margin:2px 0 8px;color:var(--mid);font-size:13px}
+.dlg li .row{display:flex;flex-wrap:wrap;gap:6px}
+.dlg li .row button{flex:1 1 120px;padding:11px 8px}
+.dlg .addr{font-weight:800;color:var(--navy);user-select:all}
+.dlg .close{margin-top:12px;width:100%;padding:12px}
+.mini{display:none;position:fixed;right:10px;bottom:10px;z-index:30;width:min(62vw,300px);background:#fff;border:2px solid var(--navy);box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer}
+.mini svg{display:block;width:100%;height:auto}
+@media (max-width:900px){.mini.on{display:block}}
+.mini.hidef{display:none!important}
+.p .num input.bad{outline:2px solid #B3261E;outline-offset:-2px}
 .foot{margin:26px 0 10px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--mid);display:flex;flex-wrap:wrap;gap:6px 18px}
 .foot b{color:var(--ink);font-weight:700}
 /* guida breve (prima apertura, poi dal pulsante GUIDA) e striscia di aggiornamento */
@@ -111,7 +140,7 @@ button,input,select,textarea{font-family:inherit}
 @media print{
   @page{size:A4 landscape;margin:0}
   html,body{background:#fff}
-  .top,.claim,.lead,aside,.tools,.foot,.card h2{display:none!important}
+  .top,.claim,.lead,aside,.tools,.foot,.card h2,.mini,.toast,.dlg,.upd{display:none!important}
   main{max-width:none;padding:0;margin:0}
   .grid{display:block}
   .card{border:0}
@@ -139,8 +168,8 @@ button,input,select,textarea{font-family:inherit}
       </div>
       <div class="tools">
         <button class="b" id="b-pen" onclick="togglePen()" data-t="pen">DRAW BY HAND</button>
-        <button class="b" id="b-undo" onclick="undoStroke()" data-t="undo" disabled>UNDO</button>
-        <button class="b" id="b-clear" onclick="clearStrokes()" data-t="clear" disabled>CLEAR</button>
+        <button class="b" id="b-undo" onclick="undo()" data-t="undo" disabled>UNDO</button>
+        <button class="b" id="b-clear" onclick="clearStrokes()" data-t="clear" disabled>CLEAR SKETCH</button>
         <span class="sp"></span>
         <button class="b" id="b-ghost" onclick="toggleGhost()">SHOW UTR STANDARD</button>
         <button class="b" onclick="resetAll()" data-t="reset">BACK TO STANDARD</button>
@@ -154,7 +183,7 @@ button,input,select,textarea{font-family:inherit}
           <button class="b" id="t-torica" onclick="setTool('torica')">TORIC HPC Z3</button>
           <button class="b" id="t-conica" onclick="setTool('conica')">CONICAL Z2 · Z3</button>
         </div>
-        <div class="std-sel"><label data-t="std_lab">UTR STANDARD · START FROM</label><select id="std" onchange="setStd(this.value)"></select></div>
+        <div class="std-sel"><label data-t="std_lab">UTR STANDARD · START FROM</label><select id="std" onchange="setStd(this.value,1)"></select></div>
         <div class="params" id="params"></div>
         <div class="warn" id="warn"></div>
       </div>
@@ -162,24 +191,35 @@ button,input,select,textarea{font-family:inherit}
       <div class="card" style="margin-top:18px">
         <h2 data-t="h_you">YOUR DATA</h2>
         <div class="form">
+          <h4 data-t="h_who">WHO YOU ARE</h4>
           <div><label data-t="f_name">NAME</label><input id="f_name" autocomplete="name"></div>
           <div><label data-t="f_company">COMPANY</label><input id="f_company" autocomplete="organization"></div>
-          <div class="full"><label data-t="f_email">E-MAIL</label><input id="f_email" type="email" autocomplete="email"></div>
+          <div><label data-t="f_email">E-MAIL</label><input id="f_email" type="email" autocomplete="email"></div>
+          <div><label data-t="f_phone">PHONE</label><input id="f_phone" type="tel" autocomplete="tel"></div>
+          <h4 data-t="h_req">THE REQUEST</h4>
+          <div class="full"><label data-t="f_ref">YOUR REFERENCE / DRAWING No.</label><input id="f_ref" maxlength="40"></div>
           <div class="full"><label data-t="f_material">MATERIAL</label>
             <div class="mat"><button type="button" class="mat-btn" id="mat-btn" onclick="toggleMat(event)"></button><div class="mat-list" id="mat-list"></div></div>
             <input id="f_material" class="hid" style="margin-top:6px"></div>
-          <div><label data-t="f_qty">QUANTITY</label><input id="f_qty" type="number" min="1" step="1"></div>
-          <div class="full"><label data-t="f_app">APPLICATION</label><input id="f_app"></div>
-          <div class="full"><label data-t="f_note">NOTES</label><textarea id="f_note"></textarea></div>
+          <div><label data-t="f_qty">QUANTITY</label><input id="f_qty" type="number" min="1" step="1" inputmode="numeric"></div>
+          <div><label data-t="f_date">DELIVERY WANTED</label><input id="f_date" type="date"></div>
+          <div class="full"><label data-t="f_app">APPLICATION</label><input id="f_app" maxlength="120"></div>
+          <h4 data-t="h_spec">SPECIFICATIONS · ONLY IF DIFFERENT FROM THE UTR STANDARD</h4>
+          <div><label data-t="f_shank">SHANK</label><select id="f_shank"></select></div>
+          <div><label data-t="f_cool">INTERNAL COOLANT</label><select id="f_cool"></select></div>
+          <div class="full"><label data-t="f_tol">SPECIAL TOLERANCES</label><input id="f_tol" maxlength="120"></div>
+          <div class="full"><label data-t="f_coat">COATING</label><input id="f_coat" maxlength="60"></div>
+          <div class="full"><label data-t="f_note">NOTES</label><textarea id="f_note" maxlength="600"></textarea><div class="cnt" id="note-cnt"></div></div>
         </div>
         <div class="send">
-          <button class="b pri" onclick="sendMail()" data-t="send">SEND TO UTR</button>
+          <button class="b pri" onclick="showSend()" data-t="send">SEND TO UTR</button>
           <button class="b" onclick="printSheet()" data-t="pdf">PDF</button>
           <button class="b" onclick="savePng()" data-t="png">PNG</button>
           <button class="b" id="b-copy" onclick="copyLink()" data-t="copy">COPY LINK</button>
           <button class="b" id="b-share" onclick="shareIt()" data-t="share" style="display:none">SHARE</button>
         </div>
         <p class="hint" data-t="send_hint">SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.</p>
+        <p class="priv"><span data-t="priv">Your data stay in this browser only and leave it only when you send them.</span> <button onclick="forgetMe()" data-t="forget">DELETE MY DATA</button></p>
       </div>
     </aside>
   </div>
@@ -199,51 +239,87 @@ button,input,select,textarea{font-family:inherit}
   <li><span>4</span><div><b data-t="tut_4a"></b><span data-t="tut_4b" style="all:unset"></span></div></li></ol>
   <button class="b pri ok" onclick="hideTut()" data-t="tut_ok">START</button>
 </div></div>
+<div class="toast" id="toast"><span id="toast-t"></span><button id="toast-b" onclick="toastAct()"></button></div>
+<div class="mini" id="mini" onclick="$('stage').scrollIntoView({behavior:'smooth',block:'start'})"><svg viewBox="13 34 190 132"><use href="#sheet"/></svg></div>
+<div class="dlg" id="dlg" onclick="if(event.target===this)hideSend()"><div class="card">
+  <h3 data-t="sd_t">SEND TO UTR</h3>
+  <div class="chk" id="sd-chk"></div>
+  <ol>
+   <li><span>1</span><div><b data-t="sd_1">Save the drawing to attach.</b><p data-t="sd_1p"></p><div class="row"><button class="b" onclick="savePng()" data-t="sd_png">SAVE PNG</button><button class="b" onclick="printSheet()" data-t="sd_pdf">SAVE PDF</button><button class="b pri" id="sd-share" onclick="shareIt()" data-t="sd_share" style="display:none">SHARE PNG + TEXT</button></div></div></li>
+   <li><span>2</span><div><b data-t="sd_2">Open your e-mail.</b><p data-t="sd_2p"></p><div class="row"><button class="b pri" onclick="openMail()" data-t="sd_mail">OPEN E-MAIL</button></div></div></li>
+   <li><span>3</span><div><b data-t="sd_3">Your e-mail does not open?</b><p><span data-t="sd_3p"></span> <span class="addr">info@utr.it</span> · Tel. +39 030 8982261</p><div class="row"><button class="b" id="sd-copy" onclick="copyText()" data-t="sd_copy">COPY THE TEXT</button></div></div></li>
+  </ol>
+  <button class="b close" onclick="hideSend()" data-t="sd_close">CLOSE</button>
+</div></div>
 <div class="upd" id="upd"><span data-t="upd_txt">A new version of UTR Sketch is available.</span><button onclick="freshReload()" data-t="upd_btn">RELOAD</button></div>
 
 <script>
 // ---------- testi
 const TX={
- en:{sub:"YOUR SPECIAL IS OUR STANDARD.",claim1:"YOUR SPECIAL",claim2:"IS OUR STANDARD.",
+ en:{h_who:"WHO YOU ARE",h_req:"THE REQUEST",h_spec:"SPECIFICATIONS · ONLY IF DIFFERENT FROM THE UTR STANDARD",f_phone:"PHONE",f_ref:"YOUR REFERENCE / DRAWING No.",f_date:"DELIVERY WANTED",f_shank:"SHANK",f_cool:"INTERNAL COOLANT",f_tol:"SPECIAL TOLERANCES",f_coat:"COATING",
+  sh_std:"As the UTR standard (cylindrical h6)",sh_ha:"Cylindrical h6 · DIN 6535 HA",sh_hb:"Weldon flat · DIN 6535 HB",sh_he:"Whistle Notch · DIN 6535 HE",co_std:"As the UTR standard",co_yes:"Yes",co_no:"No",
+  priv:"Your data stay in this browser only and leave it only when you send them. A copied link carries them too.",forget:"DELETE MY DATA",forget_q:"Delete name, company, e-mail, notes and sketch from this browser?",
+  undo_done:"Undone.",t_std:"Values back to the standard.",t_tool:"Tool changed: values back to its standard.",t_clear:"Sketch deleted.",t_forget:"Your data have been deleted.",t_undo:"UNDO",
+  t_clamp:"{k}: allowed from {mn} to {mx} — set to {v}.",t_bad:"{k}: type a number (e.g. 8,5).",t_resume:"Your previous sketch has been restored.",t_link:"Link opened: your own previous sketch is one UNDO away and stays saved until you change something.",t_qr:"Started from the standard: your previous sketch is one UNDO away and stays saved until you change something.",
+  w_r0:"R = 0 is a sharp corner: it is no longer a toric end mill. Confirm it in the notes.",w_din:"Shank D2 is not a DIN 6535 size (3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 25, 32 mm): confirm it in the notes.",
+  sd_t:"SEND TO UTR",sd_ok:"Everything is consistent. Check the values once more on the sheet.",sd_warn:"The drawing has inconsistent values — UTR will ask you about them:",sd_noc:"Add an e-mail or a phone number, or UTR cannot answer you.",sd_bademail:"The e-mail address looks incomplete.",sd_badqty:"Quantity must be a whole number from 1 up.",
+  sd_1:"Save the drawing to attach.",sd_1p:"The e-mail cannot attach files by itself: save the PNG or the PDF now and attach it in step 2. On the phone, SHARE sends picture and text together.",sd_png:"SAVE PNG",sd_pdf:"SAVE PDF",sd_share:"SHARE PNG + TEXT",
+  sd_2:"Open your e-mail.",sd_2p:"A new message to info@utr.it opens with every value written in. Attach the file from step 1 and press Send in your e-mail.",sd_mail:"OPEN E-MAIL",
+  sd_3:"Your e-mail does not open?",sd_3p:"Copy the text and paste it into a message from your webmail to",sd_copy:"COPY THE TEXT",sd_copied:"TEXT COPIED",sd_close:"CLOSE",
+  m_att:"Drawing: see the attached PNG/PDF",m_strokes:"hand sketch with {n} strokes",m_short:"(sketch and notes are in this e-mail and in the attachment)",
+  s_ref:"YOUR REFERENCE",s_scale:"SCALE",s_disc:"Sketch for a quotation request · dimensions and tolerances are binding only on the UTR confirmation drawing · do not scale",s_bad:"INCONSISTENT VALUES — SEE THE WARNINGS",s_more:"… (continues in the e-mail)",s_data:"Standards: UTR catalogue «cc USA»",d_torica:"TORIC HPC END MILL",d_conica:"CONICAL END MILL",
+  sub:"YOUR SPECIAL IS OUR STANDARD.",claim1:"YOUR SPECIAL",claim2:"IS OUR STANDARD.",
   lead:"Pick a UTR standard, change the values, the drawing redraws itself. Add a note by hand and send it to us: we make it.",
   h_draw:"YOUR DRAWING · A4 · TRUE PROPORTIONS",h_tool:"TOOL AND UTR STANDARD",h_you:"YOUR DATA",std_lab:"UTR STANDARD · START FROM",
-  pen:"DRAW BY HAND",pen_on:"DRAWING… (TAP TO STOP)",undo:"UNDO",clear:"CLEAR",ghost:"SHOW UTR STANDARD",ghost_on:"HIDE UTR STANDARD",reset:"BACK TO STANDARD",
+  pen:"DRAW BY HAND",pen_on:"DRAWING… (TAP TO STOP)",undo:"UNDO",clear:"CLEAR SKETCH",ghost:"SHOW UTR STANDARD",ghost_on:"HIDE UTR STANDARD",reset:"BACK TO STANDARD",
   f_name:"NAME",f_company:"COMPANY",f_email:"E-MAIL",f_material:"MATERIAL",f_qty:"QUANTITY",f_app:"APPLICATION",f_note:"NOTES",
   mat_pick:"Choose the material…",mat_other:"Other material",mat_other_hint:"Type it yourself",
   help:"HELP",tut_t1:"YOUR SPECIAL",tut_t2:"IN FOUR STEPS.",tut_sub:"No account, nothing to install: the sheet is drawn while you move the sliders.",
   tut_1a:"Choose the tool and the UTR standard.",tut_1b:"Toric HPC Z3 or conical Z2 · Z3, starting from the brochure drawing or a catalogue item.",
-  tut_2a:"Change the values.",tut_2b:"Sliders or typed numbers: the drawing and the table redraw themselves, your changes turn blue, the dashed outline is the UTR standard.",
+  tut_2a:"Change the values.",tut_2b:"Sliders or typed numbers: the drawing and the table redraw themselves, your changes turn blue, the thin dash-dot outline is the UTR standard. UNDO takes back any step.",
   tut_3a:"Add a note by hand and your data.",tut_3b:"DRAW BY HAND lets you sketch on the sheet with a finger or the mouse; material, quantity and application go into the sheet notes.",
-  tut_4a:"Send it to UTR.",tut_4b:"SEND opens your e-mail with every value and a link to this sketch; PDF and PNG give you the sheet to attach. We take it from there.",
+  tut_4a:"Send it to UTR.",tut_4b:"SEND guides you: save the PNG or PDF of the sheet, open your e-mail with every value already written in, attach the file. No e-mail program? Copy the text. We take it from there.",
   tut_ok:"START",upd_txt:"A new version of UTR Sketch is available.",upd_btn:"RELOAD",
   send:"SEND TO UTR",pdf:"PDF",png:"PNG",share:"SHARE",copy:"COPY LINK",copied:"LINK COPIED",copy_hint:"Link to this sketch (every value included): paste it on your PC or send it to a colleague.",
-  send_hint:"SEND opens your e-mail program with every value already written in. Attach the PDF or the PNG of the drawing.",
+  send_hint:"SEND guides you in three steps: save the drawing, open your e-mail, attach. The sketch is saved in this browser while you work.",
   country:"Italy",brochure:"UTR DRAWING 04100814 (BROCHURE)",
-  s_specs:"TOOL SPECS",s_std:"STD",s_you:"YOURS",s_appr:"CUSTOMER APPROVAL",s_date:"DATE",s_sign:"SIGNATURE",s_desc:"DESCRIPTION",s_no:"DRAW NUMBER",s_ys:"YOUR SPECIAL",s_cust:"CUSTOMER",s_std_from:"UTR STANDARD",s_unit:"QUOTE IN MILLIMETERS",s_leg1:"dashed: UTR standard",s_leg2:"blue: your changes",s_notes:"NOTES",
+  s_specs:"TOOL SPECS",s_std:"STD",s_you:"YOURS",s_appr:"CUSTOMER APPROVAL",s_date:"DATE",s_sign:"SIGNATURE",s_desc:"DESCRIPTION",s_no:"DRAWING No.",s_ys:"YOUR SPECIAL",s_cust:"CUSTOMER",s_std_from:"UTR STANDARD",s_unit:"DIMENSIONS IN mm",s_leg1:"phantom line: UTR standard",s_leg2:"blue and *: your changes",s_notes:"NOTES",
   mail_subj:"YOUR SPECIAL · ",mail_intro:"Hello UTR, here is my special tool.",mail_link:"Open this sketch in UTR Sketch:",
-  w_l2:"Flute length L2 cannot exceed the overhang L3.",w_l2c:"Flute length L2 cannot exceed the taper length L3.",w_l3:"Overhang L3 must leave at least 10 mm of shank: L3 ≤ L1 − 10.",w_d3:"Neck D3 must be smaller than the tip diameter D1.",w_d3b:"Neck D3 cannot be larger than the shank D2.",w_d12:"Tip diameter D1 larger than the shank D2: unusual, please confirm it in the notes.",w_r:"Corner radius R cannot exceed half the tip diameter.",w_d1:"Tip diameter D1 must be smaller than the shank D2 for a conical tool.",w_cone:"The cone from D1 to D2 at this angle is longer than the tool: reduce L1 or the angle, or raise D1.",
-  tool_torica:"TORIC HPC ENDMILL Z3",tool_conica:"CONICAL ENDMILL",std:"standard",calc:"calculated",
-  d:{D1:"Tip diameter",D2:"Shank diameter",D3:"Neck diameter",L1:"Total length",L2:"Flute length",L3:"Cam overhang",L4:"Shank grip",R:"Corner radius",Z:"Flutes number",A:"Taper angle",L3c:"Taper length"}},
- it:{sub:"IL VOSTRO SPECIALE, IL NOSTRO STANDARD.",claim1:"IL VOSTRO SPECIALE,",claim2:"IL NOSTRO STANDARD.",
+  w_l2:"Flute length L2 cannot exceed the overhang L3.",w_l2c:"Flute length L2 cannot exceed the taper length L3.",w_l3:"Overhang L3 must leave at least 10 mm of shank: L3 ≤ L1 − 10.",w_d3:"Neck D3 must be smaller than the tip diameter D1.",w_d3b:"Neck D3 cannot be larger than the shank D2.",w_d12:"Tip diameter D1 larger than the shank D2: unusual, please confirm it in the notes.",w_r:"Corner radius R cannot exceed half the tip diameter.",w_d1:"Tip diameter D1 must be smaller than the shank D2 for a conical tool.",w_cone:"The cone from D1 to D2 at this angle is longer than the tool: increase L1 or the angle, or raise D1.",
+  tool_torica:"TORIC HPC Z3",tool_conica:"CONICAL Z2 · Z3",std:"standard",calc:"calculated",
+  d:{D1:"Cutting diameter",D2:"Shank diameter",D3:"Neck diameter",L1:"Overall length",L2:"Flute length",L3:"Overhang",L4:"Shank grip length",R:"Corner radius",Z:"Number of flutes",A:"Half angle (per side)",L3c:"Taper length"}},
+ it:{h_who:"CHI SIETE",h_req:"LA RICHIESTA",h_spec:"SPECIFICHE · SOLO SE DIVERSE DALLO STANDARD UTR",f_phone:"TELEFONO",f_ref:"VOSTRO RIFERIMENTO / N. DISEGNO",f_date:"CONSEGNA DESIDERATA",f_shank:"GAMBO",f_cool:"REFRIGERANTE INTERNO",f_tol:"TOLLERANZE PARTICOLARI",f_coat:"RIVESTIMENTO",
+  sh_std:"Come lo standard UTR (cilindrico h6)",sh_ha:"Cilindrico h6 · DIN 6535 HA",sh_hb:"Con piano Weldon · DIN 6535 HB",sh_he:"Whistle Notch · DIN 6535 HE",co_std:"Come lo standard UTR",co_yes:"Sì",co_no:"No",
+  priv:"I vostri dati restano solo in questo browser e partono solo quando li inviate. Anche il link copiato li contiene.",forget:"CANCELLA I MIEI DATI",forget_q:"Cancellare nome, azienda, e-mail, note e schizzo da questo browser?",
+  undo_done:"Annullato.",t_std:"Valori riportati allo standard.",t_tool:"Utensile cambiato: valori del suo standard.",t_clear:"Schizzo cancellato.",t_forget:"I vostri dati sono stati cancellati.",t_undo:"ANNULLA",
+  t_clamp:"{k}: ammesso da {mn} a {mx} — messo a {v}.",t_bad:"{k}: scrivete un numero (es. 8,5).",t_resume:"È stato ripreso il vostro ultimo sketch.",t_link:"Link aperto: il vostro sketch precedente è a un ANNULLA e resta salvato finché non cambiate qualcosa.",t_qr:"Ripartito dallo standard: il vostro sketch precedente è a un ANNULLA e resta salvato finché non cambiate qualcosa.",
+  w_r0:"R = 0 è uno spigolo vivo: non è più una fresa torica. Confermatelo nelle note.",w_din:"Il gambo D2 non è una misura DIN 6535 (3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 25, 32 mm): confermatelo nelle note.",
+  sd_t:"INVIA A UTR",sd_ok:"Tutto coerente. Ricontrollate i valori sul foglio.",sd_warn:"Il disegno ha valori incoerenti — UTR ve li chiederà:",sd_noc:"Aggiungete un’e-mail o un telefono, altrimenti UTR non può rispondervi.",sd_bademail:"L’indirizzo e-mail sembra incompleto.",sd_badqty:"La quantità deve essere un numero intero da 1 in su.",
+  sd_1:"Salvate il disegno da allegare.",sd_1p:"La posta non può allegare file da sola: salvate ora il PNG o il PDF e allegatelo al passo 2. Sul telefono CONDIVIDI manda insieme immagine e testo.",sd_png:"SALVA PNG",sd_pdf:"SALVA PDF",sd_share:"CONDIVIDI PNG + TESTO",
+  sd_2:"Aprite la posta.",sd_2p:"Si apre un messaggio nuovo a info@utr.it con tutti i valori già scritti. Allegate il file del passo 1 e premete Invia nella vostra posta.",sd_mail:"APRI LA POSTA",
+  sd_3:"La posta non si apre?",sd_3p:"Copiate il testo e incollatelo in un messaggio dalla vostra webmail a",sd_copy:"COPIA IL TESTO",sd_copied:"TESTO COPIATO",sd_close:"CHIUDI",
+  m_att:"Disegno: vedi il PNG/PDF allegato",m_strokes:"schizzo a mano con {n} tratti",m_short:"(schizzo e note sono in questa mail e nell’allegato)",
+  s_ref:"VOSTRO RIFERIMENTO",s_scale:"SCALA",s_disc:"Schizzo per richiesta d’offerta · quote e tolleranze vincolanti solo sul disegno di conferma UTR · non misurare sul foglio",s_bad:"VALORI INCOERENTI — VEDERE GLI AVVISI",s_more:"… (continua nella mail)",s_data:"Standard: catalogo UTR «cc USA»",d_torica:"FRESA TORICA HPC",d_conica:"FRESA CONICA",
+  sub:"IL VOSTRO SPECIALE, IL NOSTRO STANDARD.",claim1:"IL VOSTRO SPECIALE,",claim2:"IL NOSTRO STANDARD.",
   lead:"Scegliete uno standard UTR, cambiate i valori, il disegno si rifà da solo. Aggiungete una nota a mano e mandatecelo: lo facciamo noi.",
   h_draw:"IL VOSTRO DISEGNO · A4 · PROPORZIONI REALI",h_tool:"UTENSILE E STANDARD UTR",h_you:"I VOSTRI DATI",std_lab:"STANDARD UTR · PARTITE DA",
-  pen:"DISEGNA A MANO",pen_on:"STAI DISEGNANDO… (TOCCA PER FINIRE)",undo:"ANNULLA",clear:"CANCELLA",ghost:"MOSTRA STANDARD UTR",ghost_on:"NASCONDI STANDARD UTR",reset:"TORNA ALLO STANDARD",
+  pen:"DISEGNA A MANO",pen_on:"STAI DISEGNANDO… (TOCCA PER FINIRE)",undo:"ANNULLA",clear:"CANCELLA SCHIZZO",ghost:"MOSTRA STANDARD UTR",ghost_on:"NASCONDI STANDARD UTR",reset:"TORNA ALLO STANDARD",
   f_name:"NOME",f_company:"AZIENDA",f_email:"E-MAIL",f_material:"MATERIALE",f_qty:"QUANTITÀ",f_app:"APPLICAZIONE",f_note:"NOTE",
   mat_pick:"Scegliete il materiale…",mat_other:"Altro materiale",mat_other_hint:"Scrivetelo voi",
   help:"GUIDA",tut_t1:"IL VOSTRO SPECIALE",tut_t2:"IN QUATTRO PASSI.",tut_sub:"Niente account, niente da installare: il foglio si disegna mentre muovete i cursori.",
   tut_1a:"Scegliete l’utensile e lo standard UTR.",tut_1b:"Fresa torica HPC Z3 o conica Z2 · Z3, partendo dal disegno della brochure o da un articolo di catalogo.",
-  tut_2a:"Cambiate i valori.",tut_2b:"Cursori o numeri scritti: disegno e tabella si rifanno da soli, le vostre modifiche diventano blu, il tratteggio è lo standard UTR.",
+  tut_2a:"Cambiate i valori.",tut_2b:"Cursori o numeri scritti: disegno e tabella si rifanno da soli, le vostre modifiche diventano blu, il contorno sottile tratto-punto è lo standard UTR. ANNULLA torna indietro di un passo.",
   tut_3a:"Aggiungete una nota a mano e i vostri dati.",tut_3b:"DISEGNA A MANO permette di schizzare sul foglio con il dito o il mouse; materiale, quantità e applicazione finiscono nelle note del foglio.",
-  tut_4a:"Inviate a UTR.",tut_4b:"INVIA apre la vostra posta con tutti i valori e il link a questo sketch; PDF e PNG vi danno il foglio da allegare. Al resto pensiamo noi.",
+  tut_4a:"Inviate a UTR.",tut_4b:"INVIA vi guida: salvate il PNG o il PDF del foglio, aprite la posta con tutti i valori già scritti, allegate il file. Niente programma di posta? Copiate il testo. Al resto pensiamo noi.",
   tut_ok:"INIZIA",upd_txt:"È disponibile una nuova versione di UTR Sketch.",upd_btn:"RICARICA",
   send:"INVIA A UTR",pdf:"PDF",png:"PNG",share:"CONDIVIDI",copy:"COPIA LINK",copied:"LINK COPIATO",copy_hint:"Link a questo sketch (con tutti i valori): incollatelo sul PC o mandatelo a un collega.",
-  send_hint:"INVIA apre il vostro programma di posta con tutti i valori già scritti. Allegate il PDF o il PNG del disegno.",
+  send_hint:"INVIA vi guida in tre passi: salvate il disegno, aprite la posta, allegate. Mentre lavorate lo sketch resta salvato in questo browser.",
   country:"Italia",brochure:"DISEGNO UTR 04100814 (BROCHURE)",
-  s_specs:"DATI UTENSILE",s_std:"STD",s_you:"VOSTRO",s_appr:"APPROVAZIONE CLIENTE",s_date:"DATA",s_sign:"FIRMA",s_desc:"DESCRIZIONE",s_no:"N. DISEGNO",s_ys:"IL VOSTRO SPECIALE",s_cust:"CLIENTE",s_std_from:"STANDARD UTR",s_unit:"QUOTE IN MILLIMETRI",s_leg1:"tratteggio: standard UTR",s_leg2:"blu: le vostre modifiche",s_notes:"NOTE",
+  s_specs:"DATI UTENSILE",s_std:"STD",s_you:"VOSTRO",s_appr:"APPROVAZIONE CLIENTE",s_date:"DATA",s_sign:"FIRMA",s_desc:"DESCRIZIONE",s_no:"N. DISEGNO",s_ys:"IL VOSTRO SPECIALE",s_cust:"CLIENTE",s_std_from:"STANDARD UTR",s_unit:"QUOTE IN mm",s_leg1:"linea a due punti: standard UTR",s_leg2:"blu e *: le vostre modifiche",s_notes:"NOTE",
   mail_subj:"IL VOSTRO SPECIALE · ",mail_intro:"Buongiorno UTR, ecco il mio utensile speciale.",mail_link:"Apri questo sketch in UTR Sketch:",
-  w_l2:"La lunghezza tagliente L2 non può superare la sporgenza L3.",w_l2c:"La lunghezza tagliente L2 non può superare la lunghezza conica L3.",w_l3:"La sporgenza L3 deve lasciare almeno 10 mm di gambo: L3 ≤ L1 − 10.",w_d3:"Il collo D3 deve essere più piccolo del diametro in punta D1.",w_d3b:"Il collo D3 non può essere più grande del gambo D2.",w_d12:"Diametro in punta D1 più grande del gambo D2: insolito, confermatelo nelle note.",w_r:"Il raggio R non può superare metà del diametro in punta.",w_d1:"In una fresa conica il diametro in punta D1 deve essere minore del gambo D2.",w_cone:"Il cono da D1 a D2 con questo angolo è più lungo dell’utensile: ridurre L1 o l’angolo, o aumentare D1.",
-  tool_torica:"FRESA TORICA HPC Z3",tool_conica:"FRESA CONICA",std:"standard",calc:"calcolato",
-  d:{D1:"Diametro in punta",D2:"Diametro gambo",D3:"Diametro collo",L1:"Lunghezza totale",L2:"Lunghezza tagliente",L3:"Sporgenza",L4:"Presa del gambo",R:"Raggio sullo spigolo",Z:"Numero taglienti",A:"Angolo di conicità",L3c:"Lunghezza conica"}}
+  w_l2:"La lunghezza tagliente L2 non può superare la sporgenza L3.",w_l2c:"La lunghezza tagliente L2 non può superare la lunghezza conica L3.",w_l3:"La sporgenza L3 deve lasciare almeno 10 mm di gambo: L3 ≤ L1 − 10.",w_d3:"Il collo D3 deve essere più piccolo del diametro in punta D1.",w_d3b:"Il collo D3 non può essere più grande del gambo D2.",w_d12:"Diametro in punta D1 più grande del gambo D2: insolito, confermatelo nelle note.",w_r:"Il raggio R non può superare metà del diametro in punta.",w_d1:"In una fresa conica il diametro in punta D1 deve essere minore del gambo D2.",w_cone:"Il cono da D1 a D2 con questo angolo è più lungo dell’utensile: aumentare L1 o l’angolo, o aumentare D1.",
+  tool_torica:"TORICA HPC Z3",tool_conica:"CONICA Z2 · Z3",std:"standard",calc:"calcolato",
+  d:{D1:"Diametro di taglio",D2:"Diametro gambo",D3:"Diametro collo",L1:"Lunghezza totale",L2:"Lunghezza di taglio",L3:"Sporgenza",L4:"Presa del gambo",R:"Raggio d’angolo",Z:"Numero taglienti",A:"Semiangolo (per lato)",L3c:"Lunghezza conica"}}
 };
 // ---------- utensili: parametri [simbolo, min, max, passo]; standard = disegno UTR 04100814 (torica) o catalogo «UTR - cc USA» (CAT)
 const CAT={"torica":[{"a":"RM.5365.4554.030.020","D1":3.0,"D2":6.0,"D3":2.6,"L1":80.0,"L2":4.5,"L3":40.0,"R":0.2,"Z":3},{"a":"RM.5365.4554.030.050","D1":3.0,"D2":6.0,"D3":2.6,"L1":80.0,"L2":4.5,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.030.020","D1":3.0,"D2":6.0,"D3":2.6,"L1":100.0,"L2":4.5,"L3":60.0,"R":0.2,"Z":3},{"a":"RM.5365.4555.030.050","D1":3.0,"D2":6.0,"D3":2.6,"L1":100.0,"L2":4.5,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.040.020","D1":4.0,"D2":6.0,"D3":3.6,"L1":80.0,"L2":6.0,"L3":40.0,"R":0.2,"Z":3},{"a":"RM.5365.4554.040.050","D1":4.0,"D2":6.0,"D3":3.6,"L1":80.0,"L2":6.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.040.020","D1":4.0,"D2":6.0,"D3":3.6,"L1":100.0,"L2":6.0,"L3":60.0,"R":0.2,"Z":3},{"a":"RM.5365.4555.040.050","D1":4.0,"D2":6.0,"D3":3.6,"L1":100.0,"L2":6.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.050.050","D1":5.0,"D2":6.0,"D3":4.6,"L1":80.0,"L2":7.5,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.050.100","D1":5.0,"D2":6.0,"D3":4.6,"L1":80.0,"L2":7.5,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.5365.4555.050.050","D1":5.0,"D2":6.0,"D3":4.6,"L1":100.0,"L2":7.5,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.050.100","D1":5.0,"D2":6.0,"D3":4.6,"L1":100.0,"L2":7.5,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.5365.4554.060.050","D1":6.0,"D2":6.0,"D3":5.6,"L1":80.0,"L2":9.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.060.100","D1":6.0,"D2":6.0,"D3":5.6,"L1":80.0,"L2":9.0,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.5365.4555.060.050","D1":6.0,"D2":6.0,"D3":5.6,"L1":100.0,"L2":9.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.060.100","D1":6.0,"D2":6.0,"D3":5.6,"L1":100.0,"L2":9.0,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.5365.4554.080.050","D1":8.0,"D2":8.0,"D3":7.6,"L1":80.0,"L2":12.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.080.100","D1":8.0,"D2":8.0,"D3":7.6,"L1":80.0,"L2":12.0,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.5365.4555.080.050","D1":8.0,"D2":8.0,"D3":7.6,"L1":100.0,"L2":12.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.080.100","D1":8.0,"D2":8.0,"D3":7.6,"L1":100.0,"L2":12.0,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.5365.4554.100.050","D1":10.0,"D2":10.0,"D3":9.6,"L1":108.0,"L2":15.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.5365.4554.100.100","D1":10.0,"D2":10.0,"D3":9.6,"L1":108.0,"L2":15.0,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.5365.4554.100.150","D1":10.0,"D2":10.0,"D3":9.6,"L1":108.0,"L2":15.0,"L3":60.0,"R":1.5,"Z":3},{"a":"RM.5365.4555.100.050","D1":10.0,"D2":10.0,"D3":9.6,"L1":120.0,"L2":15.0,"L3":70.0,"R":0.5,"Z":3},{"a":"RM.5365.4555.100.100","D1":10.0,"D2":10.0,"D3":9.6,"L1":120.0,"L2":15.0,"L3":70.0,"R":1.0,"Z":3},{"a":"RM.5365.4555.100.150","D1":10.0,"D2":10.0,"D3":9.6,"L1":120.0,"L2":15.0,"L3":70.0,"R":1.5,"Z":3},{"a":"RM.5365.4554.120.150","D1":12.0,"D2":12.0,"D3":11.6,"L1":108.0,"L2":18.0,"L3":65.0,"R":1.5,"Z":3},{"a":"RM.5365.4554.120.200","D1":12.0,"D2":12.0,"D3":11.6,"L1":108.0,"L2":18.0,"L3":65.0,"R":2.0,"Z":3},{"a":"RM.5365.4554.120.350","D1":12.0,"D2":12.0,"D3":11.6,"L1":108.0,"L2":18.0,"L3":65.0,"R":3.5,"Z":3},{"a":"RM.5365.4555.120.150","D1":12.0,"D2":12.0,"D3":11.6,"L1":120.0,"L2":18.0,"L3":75.0,"R":1.5,"Z":3},{"a":"RM.5365.4555.120.200","D1":12.0,"D2":12.0,"D3":11.6,"L1":120.0,"L2":18.0,"L3":75.0,"R":2.0,"Z":3},{"a":"RM.5365.4555.120.350","D1":12.0,"D2":12.0,"D3":11.6,"L1":120.0,"L2":18.0,"L3":75.0,"R":3.5,"Z":3},{"a":"RM.5365.4556.120.150","D1":12.0,"D2":12.0,"D3":11.6,"L1":150.0,"L2":18.0,"L3":100.0,"R":1.5,"Z":3},{"a":"RM.5365.4556.120.200","D1":12.0,"D2":12.0,"D3":11.6,"L1":150.0,"L2":18.0,"L3":100.0,"R":2.0,"Z":3},{"a":"RM.5365.4556.120.350","D1":12.0,"D2":12.0,"D3":11.6,"L1":150.0,"L2":18.0,"L3":100.0,"R":3.5,"Z":3},{"a":"RM.5365.4554.160.200","D1":16.0,"D2":16.0,"D3":15.6,"L1":108.0,"L2":24.0,"L3":65.0,"R":2.0,"Z":3},{"a":"RM.5365.4554.160.350","D1":16.0,"D2":16.0,"D3":15.6,"L1":108.0,"L2":24.0,"L3":65.0,"R":3.5,"Z":3},{"a":"RM.5365.4555.160.200","D1":16.0,"D2":16.0,"D3":15.6,"L1":130.0,"L2":24.0,"L3":80.0,"R":2.0,"Z":3},{"a":"RM.5365.4555.160.350","D1":16.0,"D2":16.0,"D3":15.6,"L1":130.0,"L2":24.0,"L3":80.0,"R":3.5,"Z":3},{"a":"RM.5365.4556.160.200","D1":16.0,"D2":16.0,"D3":15.6,"L1":150.0,"L2":24.0,"L3":100.0,"R":2.0,"Z":3},{"a":"RM.5365.4556.160.350","D1":16.0,"D2":16.0,"D3":15.6,"L1":150.0,"L2":24.0,"L3":100.0,"R":3.5,"Z":3},{"a":"RM.5365.4554.200.250","D1":20.0,"D2":20.0,"D3":19.6,"L1":100.0,"L2":30.0,"L3":50.0,"R":2.5,"Z":3},{"a":"RM.5365.4554.200.350","D1":20.0,"D2":20.0,"D3":19.6,"L1":100.0,"L2":30.0,"L3":50.0,"R":3.5,"Z":3},{"a":"RM.5365.4555.200.250","D1":20.0,"D2":20.0,"D3":19.6,"L1":125.0,"L2":30.0,"L3":75.0,"R":2.5,"Z":3},{"a":"RM.5365.4555.200.350","D1":20.0,"D2":20.0,"D3":19.6,"L1":125.0,"L2":30.0,"L3":75.0,"R":3.5,"Z":3},{"a":"RM.5365.4556.200.250","D1":20.0,"D2":20.0,"D3":19.6,"L1":150.0,"L2":30.0,"L3":100.0,"R":2.5,"Z":3},{"a":"RM.5365.4556.200.350","D1":20.0,"D2":20.0,"D3":19.6,"L1":150.0,"L2":30.0,"L3":100.0,"R":3.5,"Z":3},{"a":"RM.53K5.4554.030.020","D1":3.0,"D2":6.0,"D3":2.6,"L1":80.0,"L2":4.5,"L3":40.0,"R":0.2,"Z":3},{"a":"RM.53K5.4554.030.050","D1":3.0,"D2":6.0,"D3":2.6,"L1":80.0,"L2":4.5,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.53K5.4555.030.020","D1":3.0,"D2":6.0,"D3":2.6,"L1":100.0,"L2":4.5,"L3":60.0,"R":0.2,"Z":3},{"a":"RM.53K5.4555.030.050","D1":3.0,"D2":6.0,"D3":2.6,"L1":100.0,"L2":4.5,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.53K5.4554.040.020","D1":4.0,"D2":6.0,"D3":3.6,"L1":80.0,"L2":6.0,"L3":40.0,"R":0.2,"Z":3},{"a":"RM.53K5.4554.040.050","D1":4.0,"D2":6.0,"D3":3.6,"L1":80.0,"L2":6.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.53K5.4555.040.020","D1":4.0,"D2":6.0,"D3":3.6,"L1":100.0,"L2":6.0,"L3":60.0,"R":0.2,"Z":3},{"a":"RM.53K5.4555.040.050","D1":4.0,"D2":6.0,"D3":3.6,"L1":100.0,"L2":6.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.53K5.4554.050.050","D1":5.0,"D2":6.0,"D3":4.6,"L1":80.0,"L2":7.5,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.53K5.4554.050.100","D1":5.0,"D2":6.0,"D3":4.6,"L1":80.0,"L2":7.5,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.53K5.4555.050.050","D1":5.0,"D2":6.0,"D3":4.6,"L1":100.0,"L2":7.5,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.53K5.4555.050.100","D1":5.0,"D2":6.0,"D3":4.6,"L1":100.0,"L2":7.5,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.53K5.4554.060.050","D1":6.0,"D2":6.0,"D3":5.6,"L1":80.0,"L2":9.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.53K5.4554.060.100","D1":6.0,"D2":6.0,"D3":5.6,"L1":80.0,"L2":9.0,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.53K5.4555.060.050","D1":6.0,"D2":6.0,"D3":5.6,"L1":100.0,"L2":9.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.53K5.4555.060.100","D1":6.0,"D2":6.0,"D3":5.6,"L1":100.0,"L2":9.0,"L3":60.0,"R":1.0,"Z":3},{"a":"RM.53K5.4554.080.050","D1":8.0,"D2":8.0,"D3":7.6,"L1":80.0,"L2":12.0,"L3":40.0,"R":0.5,"Z":3},{"a":"RM.53K5.4554.080.100","D1":8.0,"D2":8.0,"D3":7.6,"L1":80.0,"L2":12.0,"L3":40.0,"R":1.0,"Z":3},{"a":"RM.53K5.4555.080.050","D1":8.0,"D2":8.0,"D3":7.6,"L1":100.0,"L2":12.0,"L3":60.0,"R":0.5,"Z":3},{"a":"RM.53K5.4555.080.100","D1":8.0,"D2":8.0,"D3":7.6,"L1":100.0,"L2":12.0,"L3":60.0,"R":1.0,"Z":3}],"conica":[{"a":"TM.32S5.5554.025.060.030.030","A":3,"D1":2.5,"D2":6.0,"L1":90.0,"L2":30.0,"L3":33.39,"R":0.3,"Z":2},{"a":"TM.32S5.5555.025.060.030.030","A":3,"D1":2.5,"D2":6.0,"L1":100.0,"L2":30.0,"L3":33.39,"R":0.3,"Z":2},{"a":"TM.32S5.5554.025.080.040.030","A":3,"D1":2.5,"D2":8.0,"L1":90.0,"L2":40.0,"L3":52.47,"R":0.3,"Z":2},{"a":"TM.32S5.5555.025.080.040.030","A":3,"D1":2.5,"D2":8.0,"L1":100.0,"L2":40.0,"L3":52.47,"R":0.3,"Z":2},{"a":"TM.32S5.5554.025.080.050.030","A":3,"D1":2.5,"D2":8.0,"L1":90.0,"L2":50.0,"L3":52.47,"R":0.3,"Z":2},{"a":"TM.32S5.5555.025.080.050.030","A":3,"D1":2.5,"D2":8.0,"L1":100.0,"L2":50.0,"L3":52.47,"R":0.3,"Z":2},{"a":"TM.32S5.5554.030.080.040.035","A":3,"D1":3.0,"D2":8.0,"L1":90.0,"L2":40.0,"L3":47.7,"R":0.35,"Z":2},{"a":"TM.32S5.5555.030.080.040.035","A":3,"D1":3.0,"D2":8.0,"L1":100.0,"L2":40.0,"L3":47.7,"R":0.35,"Z":2},{"a":"TM.32S5.5554.035.080.030.035","A":3,"D1":3.5,"D2":8.0,"L1":90.0,"L2":30.0,"L3":42.93,"R":0.35,"Z":2},{"a":"TM.32S5.5555.035.080.030.035","A":3,"D1":3.5,"D2":8.0,"L1":100.0,"L2":30.0,"L3":42.93,"R":0.35,"Z":2},{"a":"TM.32S5.5554.035.080.040.035","A":3,"D1":3.5,"D2":8.0,"L1":90.0,"L2":40.0,"L3":42.93,"R":0.35,"Z":2},{"a":"TM.32S5.5555.035.080.040.035","A":3,"D1":3.5,"D2":8.0,"L1":100.0,"L2":40.0,"L3":42.93,"R":0.35,"Z":2},{"a":"TM.32S5.5554.040.080.030.040","A":3,"D1":4.0,"D2":8.0,"L1":90.0,"L2":30.0,"L3":38.16,"R":0.4,"Z":2},{"a":"TM.32S5.5555.040.080.030.040","A":3,"D1":4.0,"D2":8.0,"L1":100.0,"L2":30.0,"L3":38.16,"R":0.4,"Z":2},{"a":"TM.32S5.5554.040.100.040.040","A":3,"D1":4.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":57.24,"R":0.4,"Z":2},{"a":"TM.32S5.5555.040.100.040.040","A":3,"D1":4.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":57.24,"R":0.4,"Z":2},{"a":"TM.32S5.5554.050.100.040.050","A":3,"D1":5.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":47.7,"R":0.5,"Z":2},{"a":"TM.32S5.5555.050.100.040.050","A":3,"D1":5.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":47.7,"R":0.5,"Z":2},{"a":"TM.32S5.5554.060.100.030.060","A":3,"D1":6.0,"D2":10.0,"L1":90.0,"L2":30.0,"L3":38.16,"R":0.6,"Z":2},{"a":"TM.32S5.5555.060.100.030.060","A":3,"D1":6.0,"D2":10.0,"L1":100.0,"L2":30.0,"L3":38.16,"R":0.6,"Z":2},{"a":"TM.33S5.5554.030.080.040.035","A":3,"D1":3.0,"D2":8.0,"L1":90.0,"L2":40.0,"L3":47.7,"R":0.35,"Z":3},{"a":"TM.33S5.5555.030.080.040.035","A":3,"D1":3.0,"D2":8.0,"L1":100.0,"L2":40.0,"L3":47.7,"R":0.35,"Z":3},{"a":"TM.33S5.5554.040.080.030.040","A":3,"D1":4.0,"D2":8.0,"L1":90.0,"L2":30.0,"L3":38.16,"R":0.4,"Z":3},{"a":"TM.33S5.5555.040.080.030.040","A":3,"D1":4.0,"D2":8.0,"L1":100.0,"L2":30.0,"L3":38.16,"R":0.4,"Z":3},{"a":"TM.33S5.5554.040.100.040.040","A":3,"D1":4.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":57.24,"R":0.4,"Z":3},{"a":"TM.33S5.5555.040.100.040.040","A":3,"D1":4.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":57.24,"R":0.4,"Z":3},{"a":"TM.33S5.5554.050.100.040.050","A":3,"D1":5.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":47.7,"R":0.5,"Z":3},{"a":"TM.33S5.5555.050.100.040.050","A":3,"D1":5.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":47.7,"R":0.5,"Z":3},{"a":"TM.33S5.5554.060.100.030.060","A":3,"D1":6.0,"D2":10.0,"L1":90.0,"L2":30.0,"L3":38.16,"R":0.6,"Z":3},{"a":"TM.33S5.5555.060.100.030.060","A":3,"D1":6.0,"D2":10.0,"L1":100.0,"L2":30.0,"L3":38.16,"R":0.6,"Z":3},{"a":"TM.52S5.5554.025.080.030.030","A":5,"D1":2.5,"D2":8.0,"L1":90.0,"L2":30.0,"L3":31.43,"R":0.3,"Z":2},{"a":"TM.52S5.5554.025.100.040.030","A":5,"D1":2.5,"D2":10.0,"L1":90.0,"L2":40.0,"L3":42.86,"R":0.3,"Z":2},{"a":"TM.52S5.5554.025.120.050.030","A":5,"D1":2.5,"D2":12.0,"L1":90.0,"L2":50.0,"L3":54.29,"R":0.3,"Z":2},{"a":"TM.52S5.5555.025.080.030.030","A":5,"D1":2.5,"D2":8.0,"L1":100.0,"L2":30.0,"L3":31.43,"R":0.3,"Z":2},{"a":"TM.52S5.5555.025.100.040.030","A":5,"D1":2.5,"D2":10.0,"L1":100.0,"L2":40.0,"L3":42.86,"R":0.3,"Z":2},{"a":"TM.52S5.5555.025.120.050.030","A":5,"D1":2.5,"D2":12.0,"L1":100.0,"L2":50.0,"L3":54.29,"R":0.3,"Z":2},{"a":"TM.52S5.5554.030.100.040.035","A":5,"D1":3.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":40.01,"R":0.35,"Z":2},{"a":"TM.52S5.5554.030.120.050.035","A":5,"D1":3.0,"D2":12.0,"L1":90.0,"L2":50.0,"L3":51.44,"R":0.35,"Z":2},{"a":"TM.52S5.5555.030.100.040.035","A":5,"D1":3.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":40.01,"R":0.35,"Z":2},{"a":"TM.52S5.5555.030.120.050.035","A":5,"D1":3.0,"D2":12.0,"L1":100.0,"L2":50.0,"L3":51.44,"R":0.35,"Z":2},{"a":"TM.52S5.5554.035.100.030.035","A":5,"D1":3.5,"D2":10.0,"L1":90.0,"L2":30.0,"L3":37.15,"R":0.35,"Z":2},{"a":"TM.52S5.5554.035.120.040.035","A":5,"D1":3.5,"D2":12.0,"L1":90.0,"L2":40.0,"L3":48.58,"R":0.35,"Z":2},{"a":"TM.52S5.5555.035.100.030.035","A":5,"D1":3.5,"D2":10.0,"L1":100.0,"L2":30.0,"L3":37.15,"R":0.35,"Z":2},{"a":"TM.52S5.5555.035.120.040.035","A":5,"D1":3.5,"D2":12.0,"L1":100.0,"L2":40.0,"L3":48.58,"R":0.35,"Z":2},{"a":"TM.52S5.5554.040.100.030.040","A":5,"D1":4.0,"D2":10.0,"L1":90.0,"L2":30.0,"L3":34.29,"R":0.4,"Z":2},{"a":"TM.52S5.5554.040.120.040.040","A":5,"D1":4.0,"D2":12.0,"L1":90.0,"L2":40.0,"L3":45.72,"R":0.4,"Z":2},{"a":"TM.52S5.5555.040.100.030.040","A":5,"D1":4.0,"D2":10.0,"L1":100.0,"L2":30.0,"L3":34.29,"R":0.4,"Z":2},{"a":"TM.52S5.5555.040.120.040.040","A":5,"D1":4.0,"D2":12.0,"L1":100.0,"L2":40.0,"L3":45.72,"R":0.4,"Z":2},{"a":"TM.52S5.5554.050.120.040.050","A":5,"D1":5.0,"D2":12.0,"L1":90.0,"L2":40.0,"L3":40.01,"R":0.5,"Z":2},{"a":"TM.52S5.5555.050.120.040.050","A":5,"D1":5.0,"D2":12.0,"L1":100.0,"L2":40.0,"L3":40.01,"R":0.5,"Z":2},{"a":"TM.52S5.5555.050.160.060.050","A":5,"D1":5.0,"D2":16.0,"L1":100.0,"L2":60.0,"L3":62.87,"R":0.5,"Z":2},{"a":"TM.52S5.5554.060.120.030.060","A":5,"D1":6.0,"D2":12.0,"L1":90.0,"L2":30.0,"L3":34.29,"R":0.6,"Z":2},{"a":"TM.52S5.5554.060.160.050.060","A":5,"D1":6.0,"D2":16.0,"L1":90.0,"L2":50.0,"L3":57.15,"R":0.6,"Z":2},{"a":"TM.52S5.5555.060.120.030.060","A":5,"D1":6.0,"D2":12.0,"L1":100.0,"L2":30.0,"L3":34.29,"R":0.6,"Z":2},{"a":"TM.52S5.5555.060.160.040.060","A":5,"D1":6.0,"D2":16.0,"L1":100.0,"L2":40.0,"L3":57.15,"R":0.6,"Z":2},{"a":"TM.53S5.5554.030.100.040.035","A":5,"D1":3.0,"D2":10.0,"L1":90.0,"L2":40.0,"L3":40.01,"R":0.35,"Z":3},{"a":"TM.53S5.5554.030.120.050.035","A":5,"D1":3.0,"D2":12.0,"L1":90.0,"L2":50.0,"L3":51.44,"R":0.35,"Z":3},{"a":"TM.53S5.5555.030.100.040.035","A":5,"D1":3.0,"D2":10.0,"L1":100.0,"L2":40.0,"L3":40.01,"R":0.35,"Z":3},{"a":"TM.53S5.5555.030.120.050.035","A":5,"D1":3.0,"D2":12.0,"L1":100.0,"L2":50.0,"L3":51.44,"R":0.35,"Z":3},{"a":"TM.53S5.5554.040.100.030.040","A":5,"D1":4.0,"D2":10.0,"L1":90.0,"L2":30.0,"L3":34.29,"R":0.4,"Z":3},{"a":"TM.53S5.5554.040.120.040.040","A":5,"D1":4.0,"D2":12.0,"L1":90.0,"L2":40.0,"L3":45.72,"R":0.4,"Z":3},{"a":"TM.53S5.5555.040.100.030.040","A":5,"D1":4.0,"D2":10.0,"L1":100.0,"L2":30.0,"L3":34.29,"R":0.4,"Z":3},{"a":"TM.53S5.5555.040.120.040.040","A":5,"D1":4.0,"D2":12.0,"L1":100.0,"L2":40.0,"L3":45.72,"R":0.4,"Z":3},{"a":"TM.53S5.5554.050.120.040.050","A":5,"D1":5.0,"D2":12.0,"L1":90.0,"L2":40.0,"L3":40.01,"R":0.5,"Z":3},{"a":"TM.53S5.5555.050.120.040.050","A":5,"D1":5.0,"D2":12.0,"L1":100.0,"L2":40.0,"L3":40.01,"R":0.5,"Z":3},{"a":"TM.53S5.5555.050.160.060.050","A":5,"D1":5.0,"D2":16.0,"L1":100.0,"L2":60.0,"L3":62.87,"R":0.5,"Z":3},{"a":"TM.53S5.5554.060.120.030.060","A":5,"D1":6.0,"D2":12.0,"L1":90.0,"L2":30.0,"L3":34.29,"R":0.6,"Z":3},{"a":"TM.53S5.5554.060.160.050.060","A":5,"D1":6.0,"D2":16.0,"L1":90.0,"L2":50.0,"L3":57.15,"R":0.6,"Z":3},{"a":"TM.53S5.5555.060.120.030.060","A":5,"D1":6.0,"D2":12.0,"L1":100.0,"L2":30.0,"L3":34.29,"R":0.6,"Z":3},{"a":"TM.53S5.5555.060.160.040.060","A":5,"D1":6.0,"D2":16.0,"L1":100.0,"L2":40.0,"L3":57.15,"R":0.6,"Z":3}]};
@@ -257,35 +333,52 @@ const TOOLS={
   stds:[...CAT.conica.filter(c=>c.a==="TM.32S5.5554.040.080.030.040"),...CAT.conica.filter(c=>c.a!=="TM.32S5.5554.040.080.030.040")].map(c=>({a:c.a,bb:c.a==="TM.32S5.5554.040.080.030.040",A:c.A,D1:c.D1,D2:c.D2,L1:c.L1,L2:c.L2,R:c.R,Z:c.Z}))}
 };
 let lang=(navigator.language||"en").toLowerCase().startsWith("it")?"it":"en";
-let tool="torica", stdIdx=0, P={}, ghost=true, penOn=false, strokes=[], cur=null;
+let tool="torica", stdIdx=0, P={}, ghost=true, penOn=false, strokes=[], cur=null, FR=null, hist=[], lastSnap={k:"",t:0};   // strokes: {p:[[x,y] 0..1], f:[sc,ox,cy] se agganciato al pezzo, 0 se al foglio}
 const $=id=>document.getElementById(id);
-const t=k=>TX[lang][k]??k;
+const t=(k,o)=>{let v=TX[lang][k];if(v==null)v=k;if(o)for(const q in o)v=v.split("{"+q+"}").join(o[q]);return v};   // niente «??»: iOS 12-13 non lo capisce e la pagina restava morta
 const fmt=v=>(Math.round(v*100)/100).toLocaleString(lang==="it"?"it-IT":"en-GB",{maximumFractionDigits:2});
 const wu=(v,u)=>fmt(v)+(u==="°"?u:u?" "+u:"");   // valore + unità: «8 mm», «3°», «3»
 const T_=()=>TOOLS[tool], STD=()=>T_().stds[stdIdx];
-const unit=k=>k==="Z"?"":k==="A"?"°":"mm", sym=k=>k==="L3c"?"L3":k==="A"?"α":k;
+const unit=k=>k==="Z"?"":k==="A"?"°":"mm", sym=k=>k==="L3c"?"L3":k==="A"?"α/2":k;
+const desc=()=>t("d_"+tool)+" Z"+P.Z;   // descrizione dal numero di taglienti vero (con Z5 il cartiglio diceva ancora Z3)
 function vals(p){const o={...p};for(const k in T_().calc)o[k]=T_().calc[k](p);return o}
 function rows(){const v=vals(P),s=vals(STD());return T_().order.map(k=>({k,sym:sym(k),desc:TX[lang].d[k],std:s[k],you:v[k],unit:unit(k),same:Math.abs(s[k]-v[k])<1e-9}))}
 function stdLabel(s){if(s.b)return t("brochure");return tool==="torica"?`${s.a} · Ø${fmt(s.D1)} · L${fmt(s.L1)} · R${fmt(s.R)} · Z${s.Z}`:`${s.a}${s.bb?" (BROCHURE)":""} · ${s.A}° · Ø${fmt(s.D1)}/${fmt(s.D2)} · L${fmt(s.L1)} · Z${s.Z}`}
 
 // ---------- pannello parametri
-function buildStd(){$("std").innerHTML=T_().stds.map((s,i)=>`<option value="${i}">${stdLabel(s)}</option>`).join("");$("std").value=stdIdx}
+function buildStd(){let h="",g0=null;T_().stds.forEach((s,i)=>{const g=s.b?"":s.a.slice(0,7);if(g!==g0){if(g0!==null)h+="</optgroup>";h+=`<optgroup label="${g?(lang==="it"?"Catalogo · serie ":"Catalogue · series ")+g:(lang==="it"?"Brochure":"Brochure")}">`;g0=g}h+=`<option value="${i}">${stdLabel(s)}</option>`});$("std").innerHTML=h+"</optgroup>";$("std").value=stdIdx}
 function buildParams(){const h=[];const s=STD();
- T_().params.forEach(([k,mn,mx,st])=>{h.push(`<div class="p" id="p_${k}"><div class="sym">${sym(k)}</div><input type="range" id="r_${k}" min="${mn}" max="${mx}" step="${st}" value="${P[k]}" oninput="setP('${k}',this.value)"><div class="num"><input id="n_${k}" inputmode="decimal" value="${fmt(P[k])}" onchange="setP('${k}',this.value)"><span>${unit(k)}</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("std")} <span class="std" onclick="setP('${k}',${s[k]})">${wu(s[k],unit(k))}</span></div></div>`)});
+ T_().params.forEach(([k,mn,mx,st])=>{h.push(`<div class="p" id="p_${k}"><div class="sym">${sym(k).replace("α",'<i style="font-family:Times New Roman,Times,serif">α</i>')}</div><input type="range" id="r_${k}" min="${mn}" max="${mx}" step="${st}" value="${P[k]}" oninput="setP('${k}',this.value)"><div class="num"><input id="n_${k}" inputmode="${k==="Z"?"numeric":"decimal"}" value="${fmt(P[k])}" onchange="setP('${k}',this.value,1)"><span>${unit(k)}</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("std")} <span class="std" onclick="setP('${k}',${s[k]})">${wu(s[k],unit(k))}</span></div></div>`)});
  for(const k in T_().calc)h.push(`<div class="p calc" id="p_${k}"><div class="sym">${sym(k)}</div><div></div><div class="num"><input id="n_${k}" readonly><span>mm</span></div><div class="lab"><b>${TX[lang].d[k]}</b> · ${t("calc")}</div></div>`);
  $("params").innerHTML=h.join("")}
-function setP(k,v){v=parseFloat(String(v).replace(",","."));if(isNaN(v))v=P[k];const p=T_().params.find(x=>x[0]===k);v=Math.min(p[2],Math.max(p[1],v));v=coneRule(k,v);v=Math.round(v*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v;update()}
+// valore scritto o dal cursore: mai corretto in silenzio (collaudo 6 ott 2026: «500» restava nel campo, il disegno usava 250); arrotondato a 0,01 come si vede (7,996 diventava «8» in blu)
+function setP(k,v,typed){const x=parseFloat(String(v).trim().replace(",","."));const p=T_().params.find(q=>q[0]===k),n=$("n_"+k);
+ if(!isFinite(x)){if(typed){toast(t("t_bad",{k:sym(k)}));n.value=fmt(P[k])}return}
+ let y=Math.min(p[2],Math.max(p[1],x));y=coneRule(k,y);y=k==="Z"?Math.round(y):Math.round(y*100)/100;
+ if(typed&&Math.abs(y-x)>1e-9)toast(t("t_clamp",{k:sym(k),mn:wu(p[1],unit(k)),mx:wu(p[2],unit(k)),v:wu(y,unit(k))}));
+ if(y!==P[k]){snap("p:"+k);P[k]=y}update();if(typed)n.value=fmt(P[k])}
+// ANNULLA per tutto (valori, standard, utensile, schizzo): istantanee dello stato; i movimenti dello stesso cursore entro 1,5 s sono un passo solo
+function stateStr(){return JSON.stringify({tool,stdIdx,P,strokes})}
+function snap(key){pristine=false;const now=Date.now();if(key&&key===lastSnap.k&&now-lastSnap.t<1500){lastSnap.t=now;return}lastSnap={k:key||"",t:now};hist.push(stateStr());if(hist.length>80)hist.shift();$("b-undo").disabled=false}
+function undo(){if(!hist.length)return;pristine=false;const d=JSON.parse(hist.pop());lastSnap={k:"",t:0};tool=d.tool;stdIdx=d.stdIdx;P=d.P;strokes=d.strokes;if(d.f){FIELDS.forEach(k=>$(k).value=typeof d.f[k]==="string"?d.f[k]:"");buildMat();noteCnt()}setTool(tool,true);$("b-undo").disabled=!hist.length;toast(t("undo_done"))}
+let toastT=0,toastFn=null;
+function toast(msg,fn){$("toast-t").textContent=msg;toastFn=fn||null;$("toast-b").style.display=fn?"":"none";$("toast-b").textContent=t("t_undo");$("toast").classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>$("toast").classList.remove("on"),fn?7000:4500)}
+function toastAct(){$("toast").classList.remove("on");if(toastFn)toastFn()}
 // fresa conica: D1 deve stare sotto D2 (almeno 0,5 mm), altrimenti il cono si rovescia e L3 diventa negativo (bug segnalato 5 ott 2026): il cursore si ferma
 function coneRule(k,v){if(tool!=="conica")return v;if(k==="D1"&&v>P.D2-0.5)v=P.D2-0.5;if(k==="D2"&&v<P.D1+0.5)v=Math.ceil(P.D1+0.5);return v}
-function setStd(i){stdIdx=+i;$("std").value=stdIdx;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]]);buildParams();update()}
+function setStd(i,user){if(user)snap();stdIdx=+i;$("std").value=stdIdx;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]]);buildParams();update();if(user)toast(t("t_std"),undo)}
 function update(){const v=vals(P),s=STD();
  T_().params.forEach(([k])=>{const r=$("r_"+k),n=$("n_"+k);if(document.activeElement!==r)r.value=P[k];if(document.activeElement!==n)n.value=fmt(P[k]);$("p_"+k).classList.toggle("changed",Math.abs(P[k]-s[k])>1e-9)});
  for(const k in T_().calc)$("n_"+k).value=fmt(v[k]);
  warn(v);draw();save()}
-function warn(v){const w=[];
- if(tool==="torica"){if(P.L2>P.L3)w.push(t("w_l2"));if(P.L3>P.L1-10)w.push(t("w_l3"));if(P.D3>P.D1)w.push(t("w_d3"));if(P.D3>P.D2)w.push(t("w_d3b"));if(P.D1>P.D2)w.push(t("w_d12"));if(P.R>P.D1/2)w.push(t("w_r"))}
+function warns(v){const w=[];
+ if(tool==="torica"){if(P.L2>P.L3)w.push(t("w_l2"));if(P.L3>P.L1-10)w.push(t("w_l3"));if(P.D3>P.D1)w.push(t("w_d3"));if(P.D3>P.D2)w.push(t("w_d3b"));if(P.D1>P.D2)w.push(t("w_d12"));if(P.R>P.D1/2)w.push(t("w_r"));if(P.R<0.05)w.push(t("w_r0"))}
  else{if(P.D1>=P.D2)w.push(t("w_d1"));if(v.L3c>P.L1-10)w.push(t("w_cone"));if(P.L2>v.L3c)w.push(t("w_l2c"));if(P.R>P.D1/2)w.push(t("w_r"))}
- const e=$("warn");e.innerHTML=w.join("<br>");e.classList.toggle("on",w.length>0)}
+ if(![3,4,5,6,8,10,12,14,16,18,20,25,32].includes(P.D2))w.push(t("w_din"));return w}
+// gli avvisi «da confermare» (D2 fuori DIN, D1 > D2) non rendono incoerente il foglio; gli altri sì
+const SOFT=["w_din","w_d12","w_r0"];
+function hardWarns(v){return warns(v).filter(x=>!SOFT.some(k=>t(k)===x))}
+function warn(v){const w=warns(v);const e=$("warn");e.innerHTML=w.join("<br>");e.classList.toggle("on",w.length>0)}
 
 // ---------- geometria: metà superiore del profilo in mm, da x=0 (fondo gambo) a x=L1 (punta)
 function profile(p){const pts=[];const r=Math.min(p.R,p.D1/2);
@@ -301,12 +394,15 @@ function profile(p){const pts=[];const r=Math.min(p.R,p.D1/2);
 // ---------- raggio della silhouette della torica alla quota x (gambo, collo, tagliente, raggio in punta)
 function rAtT(p,x){const R=Math.min(p.R,p.D1/2),xf=p.L1-p.L2,L4=p.L1-p.L3;if(x<=L4)return p.D2/2;if(x<=xf)return p.D3/2;if(x<=p.L1-R)return p.D1/2;const dx=x-(p.L1-R),dd=R*R-dx*dx;return p.D1/2-R+(dd>0?Math.sqrt(dd):0)}
 // ---------- il foglio A4 (297 x 210 mm) disegnato in SVG: cornice a zone, approvazione, TOOL SPECS, disegno, cartiglio
+const PHANTOM="3 .6 .3 .6 .3 .6",AXIS="5 .8 .4 .8";   // ISO 128: tratto e due punti (standard UTR), tratto e punto (asse)
 const NS="http://www.w3.org/2000/svg",FF="Avenir Next, Helvetica Neue, Helvetica, Arial, sans-serif";
 function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e}
-function txt(g,x,y,s,size,o={}){const a={x,y,"font-size":size,"font-family":FF,"font-weight":o.w||500,fill:o.c||"#0A0A0A","text-anchor":o.a||"start","letter-spacing":o.ls||0};if(o.tr)a.transform=o.tr;g.appendChild(el("text",a,s))}
+function txt(g,x,y,s,size,o={}){const a={x,y,"font-size":size,"font-family":FF,"font-weight":o.w||500,fill:o.c||"#0A0A0A","text-anchor":o.a||"start","letter-spacing":o.ls||0};if(o.tr)a.transform=o.tr;const e=el("text",a,s);
+ if(typeof s==="string"&&s.includes("α")){e.textContent="";s.split("α").forEach((p,i)=>{if(i)e.appendChild(el("tspan",{"font-family":"Times New Roman, Times, serif","font-style":"italic"},"α"));if(p)e.appendChild(document.createTextNode(p))})}   // α in Avenir sembra una «a»
+ g.appendChild(e);return e}
 function line(g,x1,y1,x2,y2,w,c){g.appendChild(el("line",{x1,y1,x2,y2,stroke:c||"#0A0A0A","stroke-width":w}))}
 function rect(g,x,y,w,h,o={}){g.appendChild(el("rect",{x,y,width:w,height:h,fill:o.f||"none",stroke:o.s||"none","stroke-width":o.sw||0}))}
-function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firstChild);const g=el("g",{});svg.appendChild(g);
+function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firstChild);const g=el("g",{id:"sheet"});svg.appendChild(g);
  const NAVY="#11427A",v=vals(P),s=STD(),sv=vals(s);
  rect(g,0,0,297,210,{f:"#fff"});
  // cornice con zone (1-6 in alto e in basso, A-D ai lati)
@@ -315,34 +411,38 @@ function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firs
  for(let k=0;k<4;k++){const y=6+k*198/4;if(k){line(g,6,y,10,y,.25,NAVY);line(g,287,y,291,y,.25,NAVY)}txt(g,8,y+198/8+.9,"ABCD"[k],2.4,{a:"middle",w:600,c:NAVY});txt(g,289,y+198/8+.9,"ABCD"[k],2.4,{a:"middle",w:600,c:NAVY})}
  // approvazione cliente (in alto a sinistra)
  const ax=13,ay=13,aw=56,ah=18;rect(g,ax,ay,aw,ah,{s:NAVY,sw:.3});
- ["s_appr","s_date","s_sign"].forEach((k,i)=>{const y=ay+i*ah/3;if(i)line(g,ax,y,ax+aw,y,.2,NAVY);txt(g,ax+1.5,y+4.2,t(k),2.2,{w:700,c:NAVY,ls:.2})});   // solo etichette: si compila a mano
+ ["s_appr","s_date","s_sign"].forEach((k,i)=>{const y=ay+i*ah/3;if(i)line(g,ax,y,ax+aw,y,.2,NAVY);txt(g,ax+1.5,y+4,t(k),2.5,{w:700,c:NAVY,ls:.2})});   // solo etichette: si compila a mano
  // TOOL SPECS (in alto a destra): simbolo · descrizione · STD · VOSTRO
  const R=rows(),sx=208,sy=13,sw=76,rh=4.9,cols=[0,9,40,56,76];rect(g,sx,sy,sw,rh+.6,{f:NAVY});
- [["s_specs",1],["s_std",2],["s_you",3]].forEach(([k,c])=>txt(g,sx+cols[c]+1.2,sy+3.7,t(k),2.2,{w:700,c:"#fff",ls:.25}));
- R.forEach((r,i)=>{const y=sy+rh+.6+i*rh;txt(g,sx+1.2,y+3.5,r.sym,2.5,{w:800});txt(g,sx+cols[1]+1.2,y+3.5,r.desc,2.3);txt(g,sx+cols[2]+1.2,y+3.5,wu(r.std,r.unit),2.3);
-  if(!r.same)rect(g,sx+cols[3],y,cols[4]-cols[3],rh,{f:"#EEF3F9"});txt(g,sx+cols[3]+1.2,y+3.5,wu(r.you,r.unit),2.3,{w:r.same?500:800,c:r.same?"#6B7684":NAVY});line(g,sx,y+rh,sx+sw,y+rh,.15,NAVY)});
+ [["s_specs",1],["s_std",2],["s_you",3]].forEach(([k,c])=>txt(g,sx+cols[c]+1.2,sy+3.8,t(k),2.5,{w:700,c:"#fff",ls:.2}));
+ R.forEach((r,i)=>{const y=sy+rh+.6+i*rh;txt(g,sx+1.2,y+3.5,r.sym,2.5,{w:800});txt(g,sx+cols[1]+1.2,y+3.5,r.desc,2.5);txt(g,sx+cols[2]+1.2,y+3.5,wu(r.std,r.unit),2.5);
+  if(!r.same)rect(g,sx+cols[3],y,cols[4]-cols[3],rh,{f:"#EEF3F9"});txt(g,sx+cols[3]+1.2,y+3.5,wu(r.you,r.unit),2.5,{w:r.same?500:800,c:r.same?"#6B7684":NAVY});line(g,sx,y+rh,sx+sw,y+rh,.15,NAVY)});
  const syb=sy+rh+.6+R.length*rh;cols.forEach(c=>line(g,sx+c,sy,sx+c,syb,.25,NAVY));rect(g,sx,sy,sw,syb-sy,{s:NAVY,sw:.3});
  // legenda
- line(g,sx,syb+5,sx+8,syb+5,.3,NAVY);g.lastChild.setAttribute("stroke-dasharray","1.2 .8");txt(g,sx+10,syb+5.8,t("s_leg1"),2.2,{c:"#6B7684"});
- rect(g,sx,syb+8.5,8,2.4,{f:"#EEF3F9"});txt(g,sx+10,syb+10.9,t("s_leg2"),2.2,{c:"#6B7684"});
+ line(g,sx,syb+5,sx+8,syb+5,.25,NAVY);g.lastChild.setAttribute("stroke-dasharray",PHANTOM);txt(g,sx+10,syb+5.8,t("s_leg1"),2.5,{c:"#6B7684"});
+ rect(g,sx,syb+8.5,8,2.4,{f:"#EEF3F9"});txt(g,sx+10,syb+10.9,t("s_leg2"),2.5,{c:"#6B7684"});
  // slogan nella colonna di destra, sotto la legenda
  txt(g,sx,syb+24,t("claim1"),6.2,{w:800,ls:-.1});txt(g,sx,syb+31.5,t("claim2"),6.2,{w:800,c:NAVY,ls:-.1});
  // area del disegno: x 13-203, y 34-166 (quote: 3 livelli sopra, D ai lati, D3 sotto)
  const DX0=13,DX1=203,DY0=34,DY1=166;const Lmax=Math.max(P.L1,s.L1),Dmax=Math.max(P.D2,s.D2,P.D1,s.D1);
- const sc=Math.min((DX1-DX0-70)/Lmax,(DY1-DY0-50)/Dmax);const ox=DX0+34+((DX1-DX0-70)-Lmax*sc)/2,cy=(DY0+DY1)/2+10;   // 34 mm a sinistra per la quota D2, 36 a destra per «D1 = 11.3 mm» e R (5 ott 2026: con 26 l'etichetta D1 arrivava sotto la tabella)
- const X=x=>ox+x*sc,Y=y=>cy-y*sc;
+ const fit=Math.min((DX1-DX0-70)/Lmax,(DY1-DY0-50)/Dmax),sc=[10,5,2,1,0.5,0.2,0.1].find(q=>q<=fit+1e-9)||0.1;FR={sc,ox:0,cy:0};const ox=DX0+34+((DX1-DX0-70)-Lmax*sc)/2,cy=(DY0+DY1)/2+10;   // 34 mm a sinistra per la quota D2, 36 a destra per «D1 = 11.3 mm» e R (5 ott 2026: con 26 l'etichetta D1 arrivava sotto la tabella)
+ FR.ox=ox;FR.cy=cy;const X=x=>ox+x*sc,Y=y=>cy-y*sc;
  const path=pts=>{let d="";pts.forEach((q,i)=>d+=(i?"L":"M")+X(q[0]).toFixed(2)+","+Y(q[1]).toFixed(2));[...pts].reverse().forEach(q=>d+="L"+X(q[0]).toFixed(2)+","+Y(-q[1]).toFixed(2));return d+"Z"};
  const outline=q=>path(profile(q));
- if(ghost)g.appendChild(el("path",{d:outline(s),fill:"none",stroke:NAVY,"stroke-opacity":.45,"stroke-width":.25,"stroke-dasharray":"1.2 .8"}));
- g.appendChild(el("path",{d:outline(P),fill:"#fff",stroke:"#0A0A0A","stroke-width":.22,"stroke-linejoin":"round"}));
- g.appendChild(el("line",{x1:X(-3),y1:cy,x2:X(P.L1+3),y2:cy,stroke:"#0A0A0A","stroke-width":.18,"stroke-dasharray":"4 1 .8 1"}));
- if(tool==="torica"&&P.D3<P.D2&&v.L4>0){const L4=v.L4;line(g,X(L4),Y(P.D2/2),X(L4),Y(-P.D2/2),.5)}
+ // spessori ISO 128 gruppo 0,35 / 0,18: spigoli in vista 0,35, quote, assi, tratteggi e richiami 0,18
+ const W1=.35,W2=.18;
+ const xf=tool==="torica"?Math.max(P.L1-P.L3,P.L1-P.L2):P.L1-P.L2,pitch=Math.PI*P.D1/Math.tan(35*Math.PI/180),rr=Math.min(P.R,P.D1/2);
+ // il pezzo (contorno, eliche, sezione) come funzione della scala: vista principale e PARTICOLARE ingrandito della punta (collaudo 6 ott 2026: Ø3 a 1:1 illeggibile)
+ const part=(g,X,Y,cy,sc,main)=>{const path=pts=>{let d="";pts.forEach((q,i)=>d+=(i?"L":"M")+X(q[0]).toFixed(2)+","+Y(q[1]).toFixed(2));[...pts].reverse().forEach(q=>d+="L"+X(q[0]).toFixed(2)+","+Y(-q[1]).toFixed(2));return d+"Z"},outline=q=>path(profile(q));
+ if(main&&ghost)g.appendChild(el("path",{d:outline(s),fill:"none",stroke:NAVY,"stroke-opacity":.55,"stroke-width":W2,"stroke-dasharray":PHANTOM}));
+ g.appendChild(el("path",{d:outline(P),fill:"#fff",stroke:"#0A0A0A","stroke-width":W1,"stroke-linejoin":"round"}));
+ g.appendChild(el("line",{x1:X(-3),y1:cy,x2:X(P.L1+3),y2:cy,stroke:"#0A0A0A","stroke-width":W2,"stroke-dasharray":AXIS}));
  // eliche dei taglienti
- const xf=P.L1-P.L2,pitch=Math.PI*P.D1/Math.tan(35*Math.PI/180),rr=Math.min(P.R,P.D1/2);
+ const g0=g;{const gm=el("g",{transform:`translate(0 ${(2*cy).toFixed(3)}) scale(1 -1)`});g0.appendChild(gm);const g=gm;   // elica destra: specchio sull'asse (collaudo 6 ott 2026: erano sinistre)
  if(tool==="torica"){
   // ---- scanalature come nel foglio UTR (standard.js): proiezione dell'elica (S-curve) + runout, coppie filo/dorso,
   // gola = 0,60 del passo (sui disegni UTR la gola e' la fascia larga), elica 38° (stile di casa), fermate alla silhouette
-  const R=Math.min(P.R,P.D1/2),rCut=P.D1/2,k=Math.tan(38*Math.PI/180)/rCut,pA=2*Math.PI/P.Z,gola=0.60*pA,cutEnd=P.L2;
+  const R=Math.min(P.R,P.D1/2),rCut=P.D1/2,k=Math.tan(38*Math.PI/180)/rCut,pA=2*Math.PI/P.Z,gola=0.60*pA,cutEnd=Math.min(P.L2,P.L3);
   const runEnd=Math.min(cutEnd+Math.max(1.5,0.3*P.D1),P.L1-0.5),phases=[...Array(P.Z)].map((_,i)=>0.45+i*pA);
   const norm=th=>Math.atan2(Math.sin(th),Math.cos(th));
   const covers=(th,yy)=>{if(yy>runEnd)return false;for(const ph of phases){let rel=(th-(ph-k*yy))%(2*Math.PI);if(rel<0)rel+=2*Math.PI;if(rel<=gola)return true}return false};
@@ -358,76 +458,111 @@ function draw(){const svg=$("svg");while(svg.firstChild)svg.removeChild(svg.firs
   // contorno della sola zona di taglio piu' marcato (0.4): la testa si stacca dal corpo, come sui fogli UTR
   const xf2=P.L1-cutEnd,arcT=[];for(let i=0;i<=8;i++){const a=i/8*Math.PI/2;arcT.push([P.L1-R+R*Math.sin(a),P.D1/2-R+R*Math.cos(a)])}
   let dc="M"+X(xf2).toFixed(2)+","+Y(P.D1/2).toFixed(2);arcT.forEach(q=>dc+="L"+X(q[0]).toFixed(2)+","+Y(q[1]).toFixed(2));[...arcT].reverse().forEach(q=>dc+="L"+X(q[0]).toFixed(2)+","+Y(-q[1]).toFixed(2));dc+="L"+X(xf2).toFixed(2)+","+Y(-P.D1/2).toFixed(2);
-  g.appendChild(el("path",{d:dc,fill:"none",stroke:"#0A0A0A","stroke-width":.4,"stroke-linejoin":"round"}));
-  // gradino gambo/collo
-  if(P.D3<P.D2)line(g,X(P.L1-P.L3),Y(P.D2/2),X(P.L1-P.L3),Y(-P.D2/2),.25);
-  // sezione parziale sul fondo codolo con il foro del refrigerante: tratteggio 45° passo 1,2 mm, confine ad arco verso la punta
-  const bl=Math.min(8,Math.max(5,0.1*P.L1)),dh=Math.max(0.6,0.12*P.D2),hr=P.D2/2,xr=y=>bl+0.45*hr*(1-Math.pow(y/hr,2));
-  let br="";for(let i=0;i<=16;i++){const y=hr-i*2*hr/16;br+=(i?"L":"M")+X(xr(y)).toFixed(2)+","+Y(y).toFixed(2)}
-  g.appendChild(el("path",{d:br,fill:"none",stroke:"#0A0A0A","stroke-width":.18}));
-  for(let c=0.4-hr;c<=bl+hr;c+=1.2){let d="",on=false;for(let x=0.4;x<=bl+0.5*hr;x+=0.04){const y=x-c,ok=Math.abs(y)<=hr-0.05&&Math.abs(y)>=dh/2&&x<=xr(y);if(ok){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(y).toFixed(2);on=true}else on=false}if(d)g.appendChild(el("path",{d,fill:"none",stroke:"#0A0A0A","stroke-width":.1}))}
-  line(g,X(0),Y(dh/2),X(xr(dh/2)),Y(dh/2),.18);line(g,X(0),Y(-dh/2),X(xr(-dh/2)),Y(-dh/2),.18)}
+  g.appendChild(el("path",{d:dc,fill:"none",stroke:"#0A0A0A","stroke-width":W1,"stroke-linejoin":"round"}))}
  else{const helix=(ph,w)=>{let d="",on=false;for(let x=xf;x<=P.L1-rr*.6;x+=0.15){const rad=Math.min(P.D2/2,P.D1/2+(P.L1-x)*Math.tan(P.A*Math.PI/180));/* mai oltre il gambo: con L2 > L3 le eliche proseguono sul cilindro (5 ott 2026) */const th=2*Math.PI*((x-xf)/pitch+ph);if(Math.cos(th)>0.05){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(rad*Math.sin(th)).toFixed(2);on=true}else on=false}
    if(d)g.appendChild(el("path",{d,fill:"none",stroke:"#0A0A0A","stroke-width":w,"stroke-linecap":"round"}))};
-  for(let k=0;k<P.Z;k++){helix(k/P.Z,.4);helix(k/P.Z+0.42/P.Z,.18)}}
- // quote (in mm del foglio): testo 3 mm, frecce 2.2 mm
- const ch=k=>Math.abs(P[k]-s[k])>1e-9,col=c=>c?NAVY:"#0A0A0A";
- const arr=(x,y,dx,dy,c)=>g.appendChild(el("path",{d:`M${x},${y} l${dx*2.4-dy*.8},${dy*2.4+dx*.8} l${dy*1.6},${-dx*1.6} z`,fill:col(c)}));
- const dimH=(x1,x2,yref,off,s_,c)=>{const y=yref-off;line(g,x1,yref-1,x1,y-1.5,.18,col(c));line(g,x2,yref-1,x2,y-1.5,.18,col(c));line(g,x1,y,x2,y,.22,col(c));arr(x1,y,1,0,c);arr(x2,y,-1,0,c);txt(g,(x1+x2)/2,y-1,s_,3,{a:"middle",w:c?700:500,c:col(c)})};
- const dimV=(x,y1,y2,off,s_,c,below)=>{if(below){line(g,x,y1,x,below-1,.22,col(c));arr(x,y1,0,1,c);arr(x,y2,0,-1,c);txt(g,x,below+2.2,s_,3,{a:"middle",w:c?700:500,c:col(c)});return}
-  const xx=x+off,sg=off>0?1:-1;line(g,x+sg,y1,xx+sg*1.5,y1,.18,col(c));line(g,x+sg,y2,xx+sg*1.5,y2,.18,col(c));line(g,xx,y1,xx,y2,.22,col(c));arr(xx,y1,0,1,c);arr(xx,y2,0,-1,c);txt(g,xx+sg*1.8,(y1+y2)/2+1,s_,3,{a:sg>0?"start":"end",w:c?700:500,c:col(c)})};
- const leader=(x1,y1,x2,y2,s_,c)=>{line(g,x1,y1,x2,y2,.22,col(c));g.appendChild(el("circle",{cx:x1,cy:y1,r:.5,fill:col(c)}));txt(g,x2+(x2>x1?1:-1),y2+1,s_,3,{a:x2>x1?"start":"end",w:c?700:500,c:col(c)})};
- const lab=(k,val)=>`${sym(k)} = ${fmt(val)}${k==="A"?"°":" mm"}`,top=Y(Dmax/2),bot=Y(-Dmax/2);
+  for(let k=0;k<P.Z;k++){helix(k/P.Z,W1);helix(k/P.Z+0.42/P.Z,W2)}}}
+ if(tool==="torica"){
+  // gradino gambo/collo (una volta sola: prima era disegnato due volte, 0,5 e 0,25)
+  if(P.D3<P.D2&&v.L4>0)line(g,X(v.L4),Y(P.D2/2),X(v.L4),Y(-P.D2/2),W1);
+  // sezione parziale sul fondo codolo con il foro del refrigerante: tratteggio 45° passo 1,2 mm, confine ad arco verso la punta
+  if($("f_cool").value!=="no"){const bl=Math.min(8,Math.max(5,0.1*P.L1)),dh=Math.max(0.6,0.12*P.D2),hr=P.D2/2,xr=y=>bl+0.45*hr*(1-Math.pow(y/hr,2)),hp=Math.max(1.2,1.4/sc);
+  let br="";for(let i=0;i<=16;i++){const y=hr-i*2*hr/16;br+=(i?"L":"M")+X(xr(y)).toFixed(2)+","+Y(y).toFixed(2)}
+  g.appendChild(el("path",{d:br,fill:"none",stroke:"#0A0A0A","stroke-width":.18}));
+  for(let c=0.4-hr;c<=bl+hr;c+=hp){let d="",on=false;for(let x=0.4;x<=bl+0.5*hr;x+=0.04){const y=x-c,ok=Math.abs(y)<=hr-0.05&&Math.abs(y)>=dh/2&&x<=xr(y);if(ok){d+=(on?"L":"M")+X(x).toFixed(2)+","+Y(y).toFixed(2);on=true}else on=false}if(d)g.appendChild(el("path",{d,fill:"none",stroke:"#0A0A0A","stroke-width":W2}))}
+  line(g,X(0),Y(dh/2),X(xr(dh/2)),Y(dh/2),W2);line(g,X(0),Y(-dh/2),X(xr(-dh/2)),Y(-dh/2),W2)}}
+ };
+ part(g,X,Y,cy,sc,1);
+ // quote (in mm del foglio, ISO 129-1 / 3098): testo 3,5 mm, frecce 2,5 mm a 30°; quote calcolate tra parentesi (quote ausiliarie); le vostre modifiche in blu e con «*» (si legge anche in bianco e nero)
+ const ch=k=>Math.abs(P[k]-s[k])>1e-9,col=c=>c?NAVY:"#0A0A0A",TH=3.5;
+ const arr=(x,y,dx,dy,c)=>g.appendChild(el("path",{d:`M${x},${y} l${dx*2.5-dy*.67},${dy*2.5+dx*.67} l${dy*1.34},${-dx*1.34} z`,fill:col(c)}));
+ const ends=(xa,ya,xb,yb,c)=>{const L=Math.hypot(xb-xa,yb-ya);if(L<1e-6)return;const ux=(xb-xa)/L,uy=(yb-ya)/L;if(L>=6){arr(xa,ya,ux,uy,c);arr(xb,yb,-ux,-uy,c)}else{arr(xa,ya,-ux,-uy,c);arr(xb,yb,ux,uy,c);line(g,xa-ux*4,ya-uy*4,xa,ya,W2,col(c));line(g,xb,yb,xb+ux*4,yb+uy*4,W2,col(c))}};   // quota corta: frecce fuori
+ const dimH=(x1,x2,yref,off,s_,c,right,lim)=>{const y=yref-off,o={a:"middle",w:c?700:500,c:col(c)};line(g,x1,yref-1,x1,y-1.5,W2,col(c));line(g,x2,yref-1,x2,y-1.5,W2,col(c));line(g,x1,y,x2,y,W2,col(c));ends(x1,y,x2,y,c);
+  const e=txt(g,(x1+x2)/2,y-1,s_,TH,o);let tw=0;try{tw=e.getBBox().width}catch(_){}if(!tw)tw=s_.length*TH*.56;   // testo più largo della quota: fuori dalle linee di riferimento
+  if(tw>x2-x1-3){if(right||(lim!=null&&x1-tw-3<lim)){e.setAttribute("x",x2+1.5);e.setAttribute("text-anchor","start");line(g,x2,y,x2+tw+2.5,y,W2,col(c));return "r"}else{e.setAttribute("x",x1-1.5);e.setAttribute("text-anchor","end");line(g,x1-tw-2.5,y,x1,y,W2,col(c))}}};
+ const dimV=(x,y1,y2,off,s_,c,below)=>{if(below){line(g,x,y1,x,below-1,W2,col(c));ends(x,y1,x,y2,c);txt(g,x,below+2.6,s_,TH,{a:"middle",w:c?700:500,c:col(c)});return}
+  const xx=x+off,sg=off>0?1:-1;line(g,x+sg,y1,xx+sg*1.5,y1,W2,col(c));line(g,x+sg,y2,xx+sg*1.5,y2,W2,col(c));line(g,xx,y1,xx,y2,W2,col(c));ends(xx,y1,xx,y2,c);txt(g,xx+sg*1.8,(y1+y2)/2+1.2,s_,TH,{a:sg>0?"start":"end",w:c?700:500,c:col(c)})};
+ const leader=(x1,y1,x2,y2,s_,c,arrow)=>{line(g,x1,y1,x2,y2,W2,col(c));if(arrow){const L=Math.hypot(x2-x1,y2-y1);arr(x1,y1,(x2-x1)/L,(y2-y1)/L,c)}else g.appendChild(el("circle",{cx:x1,cy:y1,r:.5,fill:col(c)}));txt(g,x2+(x2>x1?1:-1),y2+1.2,s_,TH,{a:x2>x1?"start":"end",w:c?700:500,c:col(c)})};
+ const zoneA=Y(-Math.max(P.D2,s.D2,P.D1,s.D1)/2)+18,LwA=Math.min(P.L1,Math.max(tool==="torica"?Math.min(P.L2,P.L3,8*P.D1):Math.min(P.L2,12*P.D1),rr)+Math.max(3,0.6*P.D1)),HhA=(tool==="torica"?Math.min(P.D2,Math.max(P.D1,P.D3))/2:Math.min(P.D2/2,P.D1/2+LwA*Math.tan(P.A*Math.PI/180)))+1;   // conica: niente D3, il cono cresce verso il gambo
+ const kA=P.D1*sc<10&&P.D1<=P.D2?[10,5,2].find(q=>q>sc&&2*HhA*q<=Math.min(DY1-zoneA-9,40)&&LwA*q<=105):0;   // con il particolare A il raggio si quota solo lì (una quota, una volta)
+ const lab=(k,val,c,aux)=>{const s_=`${sym(k)} = ${fmt(val)}${k==="A"?"°":" mm"}${c?" *":""}`;return aux?"("+s_+")":s_},top=Y(Dmax/2),bot=Y(-Dmax/2);
  if(tool==="torica"){const L4=Math.max(0,v.L4);   // la quota mostra il valore vero (anche negativo, con l'avviso), la geometria no
-  dimH(X(0),X(P.L1),top,22,lab("L1",P.L1),ch("L1"));dimH(X(0),X(L4),top,14,lab("L4",v.L4),ch("L3")||ch("L1"));dimH(X(L4),X(P.L1),top,14,lab("L3",P.L3),ch("L3"));dimH(X(xf),X(P.L1),top,6,lab("L2",P.L2),ch("L2"));
-  dimV(X(0),Y(P.D2/2),Y(-P.D2/2),-10,lab("D2",P.D2),ch("D2"));dimV(X((L4+xf)/2),Y(P.D3/2),Y(-P.D3/2),0,lab("D3",P.D3),ch("D3"),bot+7);dimV(X(P.L1),Y(P.D1/2),Y(-P.D1/2),10,lab("D1",P.D1),ch("D1"));
-  leader(X(P.L1-rr*.3),Y(P.D1/2-rr*.3),X(P.L1)+6,top-4,"R"+fmt(P.R),ch("R"));leader(X(xf+P.L2*.5),Y(-P.D1/2),X(xf+P.L2*.5)+8,bot+10,"Z"+P.Z,ch("Z"))}
- else{const L3=v.L3c,x0=Math.max(0,P.L1-L3),a=P.A*Math.PI/180;
-  dimH(X(0),X(P.L1),top,22,lab("L1",P.L1),ch("L1"));dimH(X(x0),X(P.L1),top,14,lab("L3c",L3),ch("D1")||ch("D2")||ch("A"));dimH(X(xf),X(P.L1),top,6,lab("L2",P.L2),ch("L2"));
-  dimV(X(0),Y(P.D2/2),Y(-P.D2/2),-10,lab("D2",P.D2),ch("D2"));dimV(X(P.L1),Y(P.D1/2),Y(-P.D1/2),10,lab("D1",P.D1),ch("D1"));
-  const ax_=X(x0),ay_=Y(P.D2/2),len=Math.min(30,(X(P.L1)-ax_)*.6);g.appendChild(el("line",{x1:ax_,y1:ay_,x2:ax_+len,y2:ay_,stroke:"#0A0A0A","stroke-width":.18,"stroke-dasharray":"1 .6"}));
-  g.appendChild(el("path",{d:`M${ax_+len*.85},${ay_} A${len*.85},${len*.85} 0 0 1 ${ax_+len*.85*Math.cos(a)},${ay_+len*.85*Math.sin(a)}`,fill:"none",stroke:col(ch("A")),"stroke-width":.22}));
-  txt(g,ax_-1.5,ay_-1.5,"α = "+fmt(P.A)+"°",3,{a:"end",w:ch("A")?700:500,c:col(ch("A"))});   // a sinistra dell'inizio del cono (5 ott 2026: a destra finiva sopra «R» con i coni corti)
-  leader(X(P.L1-rr*.3),Y(P.D1/2-rr*.3),X(P.L1)+6,top-4,"R"+fmt(P.R),ch("R"));leader(X(xf+P.L2*.5),Y(-(P.D1/2+P.L2*.5*Math.tan(a))),X(xf+P.L2*.5)+8,bot+10,"Z"+P.Z,ch("Z"))}
- // note del cliente (in basso a sinistra)
- const nx=13,ny=170,nw=140,nh=27;rect(g,nx,ny,nw,nh,{s:NAVY,sw:.3});txt(g,nx+1.5,ny+3.6,t("s_notes"),2.2,{w:700,c:NAVY,ls:.2});
- // tessera ISO 513 del materiale scelto (come nelle brochure) in alto a destra del riquadro NOTE, con il codice del materiale
- const mg=matGroup();if(mg){const ts=3.6,tx0=nx+nw-1.5-ts;g.appendChild(el("rect",{x:tx0,y:ny+1.2,width:ts,height:ts,rx:ts*.12,fill:ISO[mg].c}));txt(g,tx0+ts/2,ny+1.2+ts*.74,mg,2.5,{a:"middle",w:800,c:mg==="M"?"#0A0A0A":"#fff"});txt(g,tx0-1.5,ny+3.6,"ISO "+mg+" · "+matSel()[1],2.2,{a:"end",w:700,c:NAVY,ls:.1})}
- const notes=[];const who=[$("f_name").value,$("f_company").value,$("f_email").value].map(x=>x.trim()).filter(Boolean).join(" · ");if(who)notes.push(t("s_cust")+": "+who);
- [["f_material"],["f_app"],["f_qty"],["f_note"]].forEach(([k])=>{const vv=$(k).value.trim();if(vv)notes.push(t(k)+": "+vv)});
- wrapLines(notes.join("  ·  "),78).slice(0,6).forEach((l,i)=>txt(g,nx+1.5,ny+8+i*3.6,l,2.5));
- // cartiglio (in basso a destra), molto semplice (richiesta utente 4 ott 2026): logo · descrizione · YOUR SPECIAL · data · unità
+  dimH(X(0),X(P.L1),top,22,lab("L1",P.L1,ch("L1")),ch("L1"));dimH(X(0),X(L4),top,14,lab("L4",v.L4,ch("L3")||ch("L1"),1),ch("L3")||ch("L1"));dimH(X(L4),X(P.L1),top,14,lab("L3",P.L3,ch("L3")),ch("L3"),1);const l2r=dimH(X(xf),X(P.L1),top,6,lab("L2",P.L2,ch("L2")),ch("L2"),0,X(L4))==="r";   // L2 corta: a sinistra solo se non tocca la linea L4/L3; L3 corta: testo oltre la punta (a sinistra c'è L4 sulla stessa riga)
+  dimV(X(0),Y(P.D2/2),Y(-P.D2/2),-10,lab("D2",P.D2,ch("D2")),ch("D2"));dimV(X((L4+xf)/2),Y(P.D3/2),Y(-P.D3/2),0,lab("D3",P.D3,ch("D3")),ch("D3"),bot+7);dimV(X(P.L1),Y(P.D1/2),Y(-P.D1/2),10,lab("D1",P.D1,ch("D1")),ch("D1"));
+  if(rr>=0.05&&!kA){const a45=Math.PI/4,px=P.L1-rr+rr*Math.sin(a45),py=P.D1/2-rr+rr*Math.cos(a45);if(l2r)leader(X(px),Y(-py),X(P.L1)+6,Math.max(bot+3,cy+6.5),"R"+fmt(P.R)+(ch("R")?" *":""),ch("R"),1);else leader(X(px),Y(py),X(P.L1)+6,Math.min(top-3,cy-5.3),"R"+fmt(P.R)+(ch("R")?" *":""),ch("R"),1)}
+  {const zx=X(xf+(P.L1-xf)*.5),d3=lab("D3",P.D3,ch("D3"));leader(zx,Y(-P.D1/2),Math.max(zx+8,X((L4+xf)/2)+d3.length*TH*.27+3),bot+10,"Z"+P.Z+(ch("Z")?" *":""),ch("Z"))}}   // il richiamo di Z non passa sul testo di D3 (utensili piccoli)
+ else{const L3=v.L3c,x0=Math.max(0,P.L1-L3),a=P.A*Math.PI/180,cL=ch("D1")||ch("D2")||ch("A");
+  dimH(X(0),X(P.L1),top,22,lab("L1",P.L1,ch("L1")),ch("L1"));dimH(X(x0),X(P.L1),top,14,lab("L3c",L3,cL,1),cL);dimH(X(xf),X(P.L1),top,6,lab("L2",P.L2,ch("L2")),ch("L2"),1);
+  dimV(X(0),Y(P.D2/2),Y(-P.D2/2),-10,lab("D2",P.D2,ch("D2")),ch("D2"));dimV(X(P.L1),Y(P.D1/2),Y(-P.D1/2),10,lab("D1",P.D1,ch("D1")),ch("D1"));
+  // α/2: linea parallela all'asse dall'inizio del cono, arco di raggio ≥ 15 mm con frecce esterne (a 3° l'arco è corto: ISO 129-1)
+  const ax_=X(x0),ay_=Y(P.D2/2),fr=X(Math.max(xf,x0))-ax_,rA=Math.max(4,Math.min(30,fr>12?fr-3:fr>6?fr-2:Math.max(15,(X(P.L1)-ax_)*.6),X(P.L1)-ax_-1));   // arco nel tratto conico senza taglienti, se c'èg.appendChild(el("line",{x1:ax_,y1:ay_,x2:ax_+rA+2,y2:ay_,stroke:"#0A0A0A","stroke-width":W2}));
+  g.appendChild(el("path",{d:`M${ax_+rA},${ay_} A${rA},${rA} 0 0 1 ${ax_+rA*Math.cos(a)},${ay_+rA*Math.sin(a)}`,fill:"none",stroke:col(ch("A")),"stroke-width":W2}));
+  arr(ax_+rA,ay_,0,-1,ch("A"));arr(ax_+rA*Math.cos(a),ay_+rA*Math.sin(a),-Math.sin(a),Math.cos(a),ch("A"));
+  if(fr>12&&rA-2.5>lab("A",P.A,ch("A")).length*TH*.56)txt(g,ax_+rA-1.5,ay_-2,lab("A",P.A,ch("A")),TH,{a:"end",w:ch("A")?700:500,c:col(ch("A"))});else txt(g,ax_-1.5,ay_-1.5,lab("A",P.A,ch("A")),TH,{a:"end",w:ch("A")?700:500,c:col(ch("A"))});   // testo vicino all'arco, mai sotto L2   // «α/2»: semiangolo per lato, come nel catalogo (L3 = (D2 − D1) / (2·tan α/2))
+  if(rr>=0.05&&!kA)leader(X(P.L1-rr*.3),Y(-(P.D1/2-rr*.3)),X(P.L1)+6,Math.max(bot+3,cy+6.5),"R"+fmt(P.R)+(ch("R")?" *":""),ch("R"),1);leader(X(xf+P.L2*.5),Y(-(P.D1/2+P.L2*.5*Math.tan(a))),X(xf+P.L2*.5)+8,bot+10,"Z"+P.Z+(ch("Z")?" *":""),ch("Z"))}
+ // PARTICOLARE A (ISO 128): punta ingrandita quando a scala del foglio D1 è sotto 10 mm, nello spazio libero sotto le quote
+ {const zone=zoneA,Lw=LwA,Hh=HhA,k=kA;
+  if(k){const bx=DX0+44,byc=zone+6+Hh*k,x0d=P.L1-Lw,Xd=x=>bx+(x-x0d)*k,Yd=y=>byc-y*k,cid="clipA";
+   const cp=el("clipPath",{id:cid});cp.appendChild(el("rect",{x:bx,y:byc-Hh*k,width:Lw*k+1.5,height:2*Hh*k}));g.appendChild(cp);
+   const gd=el("g",{"clip-path":`url(#${cid})`});g.appendChild(gd);part(gd,Xd,Yd,byc,k,0);
+   const scT=k+" : 1",cm=X(P.L1-Lw/2),rm=Math.max(Lw*sc/2,Hh*sc)+1.2;g.appendChild(el("circle",{cx:cm,cy:cy,r:rm,fill:"none",stroke:"#0A0A0A","stroke-width":W2}));
+   {const tb=[...g.querySelectorAll("text")].filter(e=>e.getAttribute("font-size")==="3.5").map(e=>e.getBBox());   // lettera A nel primo posto libero attorno al cerchio
+    const pos=[2.5,6,10].flatMap(dr=>[135,45,225,315,180,90,270].map(d=>[cm+(rm+dr)*Math.cos(d*Math.PI/180),cy-(rm+dr)*Math.sin(d*Math.PI/180)])).find(([x,y])=>!tb.some(b=>x-2<b.x+b.width&&x+2>b.x&&y-2.6<b.y+b.height&&y+2.6>b.y))||[cm-rm-2,cy-rm];txt(g,pos[0],pos[1]+1.2,"A",TH,{a:"middle",w:700})}txt(g,bx,byc-Hh*k-2.2,"A ("+scT+")",TH,{w:700});
+   if(rr>=0.05){const a45=Math.PI/4,px=P.L1-rr+rr*Math.sin(a45),py=P.D1/2-rr+rr*Math.cos(a45);g.appendChild(el("line",{x1:Xd(px),y1:Yd(py),x2:Xd(P.L1)+6,y2:Yd(P.D1/2)-3,stroke:col(ch("R")),"stroke-width":W2}));arr(Xd(px),Yd(py),(Xd(P.L1)+6-Xd(px))/Math.hypot(Xd(P.L1)+6-Xd(px),Yd(P.D1/2)-3-Yd(py)),(Yd(P.D1/2)-3-Yd(py))/Math.hypot(Xd(P.L1)+6-Xd(px),Yd(P.D1/2)-3-Yd(py)),ch("R"));txt(g,Xd(P.L1)+7,Yd(P.D1/2)-1.8,"R"+fmt(P.R)+(ch("R")?" *":""),TH,{w:ch("R")?700:500,c:col(ch("R"))})}}}
+ // valori incoerenti: il foglio lo dice (prima PDF e PNG partivano puliti con «L4 = −170 mm»)
+ {const mx=Math.max(13,ox-34),my=top-28;const mv=$("mini").querySelector("svg");if(mv)mv.setAttribute("viewBox",`${mx.toFixed(1)} ${my.toFixed(1)} ${Math.min(203,X(Lmax)+36)-mx} ${bot+16-my}`)}   // miniatura sul telefono: il solo pezzo con le quote
+ if(hardWarns(v).length){rect(g,DX0+2,DY0+1,96,6,{f:"#FBEDEC",s:"#B3261E",sw:.3});txt(g,DX0+4,DY0+5.3,"! "+t("s_bad"),2.5,{w:800,c:"#B3261E"})}
+ // note del cliente (in basso a sinistra): il testo si rimpicciolisce fino a 1,8 mm, poi «continua nella mail» (mai tagliato a metà senza dirlo)
+ const nx=13,ny=170,nw=140,nh=27;rect(g,nx,ny,nw,nh,{s:NAVY,sw:.3});txt(g,nx+1.5,ny+3.6,t("s_notes"),1.8,{w:700,c:NAVY,ls:.2});
+ const mg=matGroup();if(mg){const ts=3.6,tx0=nx+nw-1.5-ts;g.appendChild(el("rect",{x:tx0,y:ny+1.2,width:ts,height:ts,rx:ts*.12,fill:ISO[mg].c}));txt(g,tx0+ts/2,ny+1.2+ts*.74,mg,2.5,{a:"middle",w:800,c:mg==="M"?"#0A0A0A":"#fff"});txt(g,tx0-1.5,ny+3.6,"ISO "+mg+" · "+matSel()[1],1.8,{a:"end",w:700,c:NAVY,ls:.1})}
+ const notes=[];const who=["f_name","f_company","f_email","f_phone"].map(fv).filter(Boolean).join(" · ");if(who)notes.push(t("s_cust")+": "+who);
+ ["f_material","f_qty","f_date","f_app","f_shank","f_cool","f_tol","f_coat","f_note"].forEach(k=>{const vv=fv(k);if(vv)notes.push(t(k)+": "+vv)});
+ const all=notes.join("  ·  ");let fs=2.5,ls,lines;for(fs of [2.5,2.2,2,1.8]){ls=fs*1.42;lines=wrapLines(all,Math.floor(78*2.5/fs));if(lines.length<=Math.floor((nh-6)/ls))break}
+ const maxL=Math.floor((nh-6)/ls);if(lines.length>maxL){lines=lines.slice(0,maxL);lines[maxL-1]=lines[maxL-1].slice(0,Math.max(0,Math.floor(78*2.5/fs)-t("s_more").length))+t("s_more")}
+ lines.forEach((l,i)=>txt(g,nx+1.5,ny+6.2+fs+i*ls,l,fs));
+ // colonna di destra, sotto lo slogan: dicitura sul valore del foglio e fonte degli standard
+ wrapLines(t("s_disc"),46).concat([t("s_data")+" · UTR Sketch v"+VERSION]).forEach((l,i)=>txt(g,sx,150+i*2.7,l,1.8,{c:"#6B7684"}));
+ // cartiglio (in basso a destra): logo · descrizione (con lo Z vero) · standard UTR di partenza · vostro riferimento | data ISO 8601 · scala · unità
  const cx=157,cy_=170,cw=127,chh=27;rect(g,cx,cy_,cw,chh,{s:NAVY,sw:.3});
  g.appendChild(el("image",{href:$("logo").src,x:cx+3,y:cy_+(chh-28*308/800)/2,width:28,height:28*308/800}));line(g,cx+34,cy_,cx+34,cy_+chh,.2,NAVY);
- const tx=cx+37;txt(g,tx,cy_+5.2,t("s_desc"),2.1,{w:700,c:NAVY,ls:.2});txt(g,tx,cy_+10.2,t(T_().name),3.6,{w:800});
- txt(g,tx,cy_+16.6,t("s_no"),2.1,{w:700,c:NAVY,ls:.2});txt(g,tx,cy_+21.6,t("s_ys"),3.6,{w:800,c:NAVY});
- txt(g,cx+cw-3,cy_+10.2,new Date().toLocaleDateString(lang==="it"?"it-IT":"en-GB"),3,{a:"end",w:600});
- txt(g,cx+cw-3,cy_+21.6,t("s_unit"),2.1,{a:"end",w:600,ls:.2});
+ [9,18].forEach(dy=>line(g,cx+34,cy_+dy,cx+cw,cy_+dy,.15,NAVY));line(g,cx+cw-26,cy_,cx+cw-26,cy_+chh,.15,NAVY);
+ const tx=cx+37,rx=cx+cw-24,scl=sc>=1?fmt(sc)+" : 1":"1 : "+fmt(1/sc),dt=new Date(),iso=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+ txt(g,tx,cy_+3.4,t("s_desc"),1.8,{w:700,c:NAVY,ls:.2});txt(g,tx,cy_+7.9,desc(),3.5,{w:800});
+ txt(g,tx,cy_+12.4,t("s_std_from"),1.8,{w:700,c:NAVY,ls:.2});txt(g,tx,cy_+16.4,stdCode(),2.5,{w:700});
+ txt(g,tx,cy_+21.4,t("s_ref"),1.8,{w:700,c:NAVY,ls:.2});txt(g,tx,cy_+25.4,fv("f_ref")||"—",2.5,{w:700,c:fv("f_ref")?NAVY:"#6B7684"});
+ txt(g,rx,cy_+3.4,t("s_date"),1.8,{w:700,c:NAVY,ls:.2});txt(g,rx,cy_+7.6,iso,2.5,{w:600});
+ txt(g,rx,cy_+12.4,t("s_scale"),1.8,{w:700,c:NAVY,ls:.2});txt(g,rx,cy_+16.4,scl,2.5,{w:700});
+ txt(g,rx,cy_+23.4,t("s_unit"),1.8,{w:700,c:NAVY,ls:.2});
  fitPen()}
 function wrapLines(s,n){const out=[];let line="";s.split(/\s+/).forEach(w=>{if(!w)return;if((line+" "+w).trim().length>n&&line){out.push(line);line=w}else line=(line+" "+w).trim()});if(line)out.push(line);return out}
 
 // ---------- disegno a mano (canvas sopra il foglio; tratti in coordinate 0..1)
 const pen=$("pen"),ctx=pen.getContext("2d");
 function fitPen(){const r=$("stage").getBoundingClientRect(),dpr=window.devicePixelRatio||1;const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);if(pen.width!==w||pen.height!==h){pen.width=w;pen.height=h}redrawPen()}
+// un tratto che parte nell'area del disegno resta attaccato al pezzo: se la scala o la posizione cambiano (L1, D…) si sposta con lui (collaudo 6 ott 2026: la freccia «qui il raccordo» finiva altrove)
+function sp(s){if(!s.f||!FR)return s.p;const[sc0,ox0,cy0]=s.f;if(sc0===FR.sc&&ox0===FR.ox&&cy0===FR.cy)return s.p;return s.p.map(q=>[(FR.ox+(q[0]*297-ox0)/sc0*FR.sc)/297,(FR.cy+(q[1]*210-cy0)/sc0*FR.sc)/210])}
 function redrawPen(){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,pen.width,pen.height);const w=pen.width,h=pen.height;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#11427A";ctx.lineWidth=Math.max(2,w/500);
- strokes.concat(cur?[cur]:[]).forEach(s=>{if(s.length<2)return;ctx.beginPath();s.forEach((q,i)=>ctx[i?"lineTo":"moveTo"](q[0]*w,q[1]*h));ctx.stroke()});
- $("b-undo").disabled=$("b-clear").disabled=strokes.length===0}
-function pos(e){const r=pen.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]}
+ strokes.map(sp).concat(cur?[cur]:[]).forEach(s=>{if(s.length<2)return;ctx.beginPath();s.forEach((q,i)=>ctx[i?"lineTo":"moveTo"](q[0]*w,q[1]*h));ctx.stroke()});
+ $("b-clear").disabled=strokes.length===0}
+function pos(e){const r=pen.getBoundingClientRect(),c=v=>Math.min(1,Math.max(0,v));return[c((e.clientX-r.left)/r.width),c((e.clientY-r.top)/r.height)]}
 pen.addEventListener("pointerdown",e=>{if(!penOn)return;pen.setPointerCapture(e.pointerId);cur=[pos(e)];e.preventDefault()});
-pen.addEventListener("pointermove",e=>{if(!cur)return;cur.push(pos(e));redrawPen();e.preventDefault()});
-const endS=()=>{if(!cur)return;if(cur.length>1)strokes.push(cur);cur=null;redrawPen();save()};
+pen.addEventListener("pointermove",e=>{if(!cur)return;const q=pos(e),l=cur[cur.length-1];if(Math.hypot(q[0]-l[0],(q[1]-l[1])*.707)<0.0012)return;cur.push(q);redrawPen();e.preventDefault()});
+const endS=()=>{if(!cur)return;if(cur.length>1){snap();const x0=cur[0][0]*297,y0=cur[0][1]*210,inD=x0>=13&&x0<=203&&y0>=34&&y0<=166;strokes.push({p:cur,f:inD&&FR?[FR.sc,FR.ox,FR.cy]:0})}cur=null;redrawPen();save()};
 pen.addEventListener("pointerup",endS);pen.addEventListener("pointercancel",endS);
 function togglePen(){penOn=!penOn;$("stage").classList.toggle("pen",penOn);const b=$("b-pen");b.classList.toggle("on",penOn);b.textContent=t(penOn?"pen_on":"pen")}
-function undoStroke(){strokes.pop();redrawPen();save()}
-function clearStrokes(){strokes=[];redrawPen();save()}
+function clearStrokes(){if(!strokes.length)return;snap();strokes=[];redrawPen();save();toast(t("t_clear"),undo)}
 function toggleGhost(){ghost=!ghost;$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("b-ghost").classList.toggle("on",ghost);draw()}
-function resetAll(){setStd(stdIdx)}
+function resetAll(){setStd(stdIdx,1)}
 
 // ---------- utensile, lingua, memoria locale, indirizzo
-function setTool(k,keep){tool=k;$("t-torica").classList.toggle("on",k==="torica");$("t-conica").classList.toggle("on",k==="conica");if(!keep){stdIdx=0;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}buildStd();buildParams();update()}
+function setTool(k,keep){if(!keep){if(k===tool)return;snap();strokes=[]}tool=k;$("t-torica").classList.toggle("on",k==="torica");$("t-conica").classList.toggle("on",k==="conica");if(!keep){stdIdx=0;P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}buildStd();buildParams();update();redrawPen();if(!keep)toast(t("t_tool"),undo)}
 function setLang(l){lang=l;$("lang-en").classList.toggle("on",l==="en");$("lang-it").classList.toggle("on",l==="it");document.documentElement.lang=l;
  document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=t(e.dataset.t)});
- $("b-pen").textContent=t(penOn?"pen_on":"pen");$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("t-torica").textContent=t("tool_torica");$("t-conica").textContent=t("tool_conica");buildMat();buildStd();buildParams();update()}
+ $("b-pen").textContent=t(penOn?"pen_on":"pen");$("b-ghost").textContent=t(ghost?"ghost_on":"ghost");$("t-torica").textContent=t("tool_torica");$("t-conica").textContent=t("tool_conica");buildSel();buildMat();buildStd();buildParams();update();noteCnt()}
+function buildSel(){const o=(id,a)=>{const e=$(id),v=e.value;e.innerHTML=a.map(([val,k])=>`<option value="${val}">${t(k)}</option>`).join("");e.value=v||""};
+ o("f_shank",[["","sh_std"],["HA","sh_ha"],["HB","sh_hb"],["HE","sh_he"]]);o("f_cool",[["","co_std"],["yes","co_yes"],["no","co_no"]])}
+function fv(k){const e=$(k);if(e.tagName==="SELECT")return e.value?e.options[e.selectedIndex].text:"";return e.value.trim()}
+function noteCnt(){const n=$("f_note").value.length,e=$("note-cnt");e.textContent=n+" / 600";e.classList.toggle("over",n>=600)}
 // ---------- materiale: gruppi ISO 513 con i colori delle brochure (P #0071BC, H #8A8D8F) e ISO per gli altri; il valore salvato
 // in f_material è «ISO P · 42CrMo4 · 1.7225 · nome» (si riconosce dal codice al ricaricamento e al cambio lingua)
 const ISO={P:{c:"#0071BC",en:"Steels",it:"Acciai"},M:{c:"#F2C400",en:"Stainless steels",it:"Acciai inossidabili"},K:{c:"#E30613",en:"Cast irons",it:"Ghise"},N:{c:"#009640",en:"Non-ferrous metals",it:"Metalli non ferrosi"},S:{c:"#F39200",en:"Superalloys and titanium",it:"Superleghe e titanio"},H:{c:"#8A8D8F",en:"Hardened materials",it:"Materiali temprati"}};
@@ -453,30 +588,57 @@ function buildMat(){const m=matSel();const inp=$("f_material");
 function pickMat(i){const inp=$("f_material");if(i>=0){matOther=false;inp.value=matVal(MATS[i])}else{matOther=true;inp.value="";setTimeout(()=>inp.focus(),0)}$("mat-list").classList.remove("on");buildMat();save();draw()}
 function toggleMat(e){e.stopPropagation();$("mat-list").classList.toggle("on")}
 document.addEventListener("click",e=>{if(!e.target.closest(".mat"))$("mat-list").classList.remove("on")});
-const FIELDS=["f_name","f_company","f_email","f_material","f_qty","f_app","f_note"];
-function save(){try{localStorage.setItem("utr-sketch",JSON.stringify({tool,stdIdx,P,strokes,lang,f:Object.fromEntries(FIELDS.map(k=>[k,$(k).value]))}))}catch(e){}}
+const FIELDS=["f_name","f_company","f_email","f_phone","f_ref","f_material","f_qty","f_date","f_app","f_shank","f_cool","f_tol","f_coat","f_note"];
+let lastUrl="",pristine=false;
+function save(){if(pristine)return;try{localStorage.setItem("utr-sketch",JSON.stringify({tool,stdIdx,P,strokes,lang,f:Object.fromEntries(FIELDS.map(k=>[k,$(k).value]))}))}catch(e){}
+ // l'indirizzo resta «?tool=…&lang=…»: ricaricando (o con RICARICA) si riprende la bozza, mai lo standard sopra il lavoro (collaudo 6 ott 2026)
+ const u=location.pathname+"?tool="+tool+"&lang="+lang;if(u!==lastUrl&&!/[?&]print=/.test(location.search)){lastUrl=u;try{history.replaceState(null,"",u)}catch(e){}}}
+const normStrokes=a=>Array.isArray(a)?a.map(x=>Array.isArray(x)?{p:x,f:0}:x).filter(x=>x&&Array.isArray(x.p)&&x.p.length>1&&x.p.every(q=>Array.isArray(q)&&isFinite(q[0])&&isFinite(q[1]))).map(x=>({p:x.p.map(q=>[+q[0],+q[1]]),f:Array.isArray(x.f)&&x.f.length===3&&x.f.every(isFinite)?x.f.map(Number):0})):[];
+// schizzo nel link: ogni punto = 4 caratteri base36 (passo 1/1295 del foglio, 0,23 mm)
+const encS=a=>a.map(x=>({f:x.f?x.f.map(v=>+(+v).toFixed(3)):0,p:x.p.map(q=>q.map(v=>Math.round(Math.min(1,Math.max(0,v))*1295).toString(36).padStart(2,"0")).join("")).join("")}));
+const decS=a=>normStrokes((Array.isArray(a)?a:[]).map(x=>({f:x.f,p:(String(x.p||"").match(/.{4}/g)||[]).map(c=>[parseInt(c.slice(0,2),36)/1295,parseInt(c.slice(2),36)/1295])})));
+const b64e=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d=x=>JSON.parse(decodeURIComponent(escape(atob(x.replace(/-/g,"+").replace(/_/g,"/")))));
 function load(){try{const d=JSON.parse(localStorage.getItem("utr-sketch")||"null");if(!d||!TOOLS[d.tool])return false;tool=d.tool;stdIdx=Math.max(0,Math.min(parseInt(d.stdIdx)||0,TOOLS[tool].stds.length-1));P=(d.P&&typeof d.P==="object")?d.P:{};
  strokes=Array.isArray(d.strokes)?d.strokes.filter(x=>Array.isArray(x)&&x.length>1&&x.every(q=>Array.isArray(q)&&isFinite(q[0])&&isFinite(q[1]))).map(x=>x.map(q=>[+q[0],+q[1]])):[];   // bozza corrotta: mai crash (fuzz 5 ott 2026)
- if(d.lang==="it"||d.lang==="en")lang=d.lang;FIELDS.forEach(k=>{if(d.f&&typeof d.f[k]==="string")$(k).value=d.f[k]});return true}catch(e){return false}}
+ strokes=normStrokes(d.strokes);if(d.lang==="it"||d.lang==="en")lang=d.lang;FIELDS.forEach(k=>{if(d.f&&typeof d.f[k]==="string")$(k).value=d.f[k]});return true}catch(e){return false}}
 function fromUrl(){const u=new URLSearchParams(location.search);if(!u.has("tool")||!TOOLS[u.get("tool")])return false;tool=u.get("tool");const T=TOOLS[tool];stdIdx=0;
  if(u.has("std")){const i=T.stds.findIndex(s=>s.a===u.get("std"));if(i>=0)stdIdx=i}
  P={};T.params.forEach(p=>{P[p[0]]=u.has(p[0])?parseFloat(String(u.get(p[0])).replace(",",".")):STD()[p[0]]});if(u.get("lang"))lang=u.get("lang")==="it"?"it":"en";return true}
 // valori non numerici o fuori dai limiti (indirizzo scritto a mano, bozza di una versione vecchia): si torna allo standard o al limite, mai NaN sul foglio
 function sanitize(){const s=STD();T_().params.forEach(([k,mn,mx])=>{let v=parseFloat(P[k]);if(!isFinite(v))v=s[k];v=Math.round(Math.min(mx,Math.max(mn,v))*1000)/1000;if(k==="Z")v=Math.round(v);P[k]=v});if(tool==="conica"&&P.D1>P.D2-0.5)P.D1=Math.max(0.5,Math.round((P.D2-0.5)*10)/10)}
-function link(){const u=new URL(location.href.split("?")[0]);u.searchParams.set("tool",tool);u.searchParams.set("std",STD().a);T_().params.forEach(p=>u.searchParams.set(p[0],P[p[0]]));u.searchParams.set("lang",lang);return u.toString()}
+// link: quote in chiaro + dati e schizzo nel frammento #d= (collaudo 6 ott 2026: il link riapriva solo le quote e prendeva i dati dal browser di chi lo apriva)
+function link(full=true){const u=new URL(location.href.split("?")[0].split("#")[0]);u.searchParams.set("tool",tool);u.searchParams.set("std",STD().a);T_().params.forEach(p=>u.searchParams.set(p[0],P[p[0]]));u.searchParams.set("lang",lang);
+ let h="";if(full){const f={};FIELDS.forEach(k=>{if($(k).value.trim())f[k]=$(k).value});if(Object.keys(f).length||strokes.length)h="#d="+b64e({f,s:encS(strokes)})}return u.toString()+h}
+function readHash(){try{const m=location.hash.match(/[#&]d=([^&]+)/);return m?b64d(m[1]):null}catch(e){return null}}
 
 // ---------- invio, PDF, PNG, condivisione
-function summary(){const L=TX[lang];let s=L.mail_intro+"\n\n"+t(T_().name)+" · "+t("s_std_from")+": "+(STD().b?"UTR 04100814":STD().a)+"\n";
+const stdCode=()=>STD().b?"UTR 04100814":STD().a;
+function summary(full=true){const L=TX[lang];let s=L.mail_intro+"\n\n"+desc()+" · "+t("s_std_from")+": "+stdCode()+"\n";
  rows().forEach(x=>{s+=`${x.sym}  ${x.desc}: ${wu(x.you,x.unit)}`+(x.same?"":`   (${t("std")} ${wu(x.std,x.unit)})`)+"\n"});
- s+="\n";FIELDS.forEach(k=>{const v=$(k).value.trim();if(v)s+=t(k)+": "+v+"\n"});
- s+="\n"+L.mail_link+"\n"+link()+"\n";return s}
-function sendMail(){const subj=TX[lang].mail_subj+t(T_().name)+($("f_company").value.trim()?" · "+$("f_company").value.trim():"");location.href="mailto:info@utr.it?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(summary())}
+ const w=warns(vals(P));if(w.length)s+="\n"+w.map(x=>"! "+x).join("\n")+"\n";
+ s+="\n";FIELDS.forEach(k=>{const v=fv(k);if(v)s+=t(k)+": "+v+"\n"});
+ s+="\n"+t("m_att")+(strokes.length?" · "+t("m_strokes",{n:strokes.length}):"")+"\n";
+ if(full!==0)s+="\n"+L.mail_link+"\n"+link(full)+"\n"+(full?"":t("m_short")+"\n");return s}
+const subject=()=>TX[lang].mail_subj+desc()+(fv("f_ref")?" · "+fv("f_ref"):"")+(fv("f_company")?" · "+fv("f_company"):"");
+// mailto lungo (note + schizzo nel link) oltre ~1900 caratteri: alcuni programmi lo tagliano → link con le sole quote, il resto è già nel testo
+function mailUrl(){const m=f=>"mailto:info@utr.it?subject="+encodeURIComponent(subject())+"&body="+encodeURIComponent(summary(f));const a=m(true);if(a.length<=1900)return a;const b=m(false);return b.length<=1900?b:m(0)}   // ultimo caso (note lunghissime): niente link, le quote sono già nel testo
+function openMail(){location.href=mailUrl()}
+function showSend(){const w=hardWarns(vals(P)),c=[],em=$("f_email").value.trim(),q=$("f_qty").value.trim();
+ if(w.length)c.push("<b>"+t("sd_warn")+"</b><br>"+w.join("<br>"));
+ if(!em&&!$("f_phone").value.trim())c.push(t("sd_noc"));if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em))c.push(t("sd_bademail"));if($("f_qty").validity.badInput||(q&&!(/^\d+$/.test(q)&&+q>=1)))c.push(t("sd_badqty"));
+ const e=$("sd-chk");e.innerHTML=c.length?c.join("<br><br>"):t("sd_ok");e.classList.toggle("ok",!c.length);
+ $("sd-share").style.display=canShareFiles()?"":"none";$("sd-copy").textContent=t("sd_copy");$("dlg").classList.add("on")}
+function hideSend(){$("dlg").classList.remove("on")}
+async function copyText(){const txt="info@utr.it\n"+subject()+"\n\n"+summary(true);let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(e){try{const i=document.createElement("textarea");i.value=txt;i.style.position="fixed";i.style.opacity="0";document.body.appendChild(i);i.select();ok=document.execCommand("copy");i.remove()}catch(e2){}}
+ if(ok)$("sd-copy").textContent=t("sd_copied");else{try{window.prompt(t("sd_copy"),txt)}catch(e){}}}
+function forgetMe(){if(!confirm(t("forget_q")))return;FIELDS.forEach(k=>$(k).value="");strokes=[];hist=[];$("b-undo").disabled=true;matOther=false;try{localStorage.removeItem("utr-sketch")}catch(e){}buildSel();buildMat();redrawPen();update();noteCnt();toast(t("t_forget"))}
 async function render(){const xml=new XMLSerializer().serializeToString($("svg")),W=2970,H=2100;const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,H);
  const im=new Image();im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml);await im.decode();x.drawImage(im,0,0,W,H);
- x.lineCap="round";x.lineJoin="round";x.strokeStyle="#11427A";x.lineWidth=6;strokes.forEach(s=>{x.beginPath();s.forEach((q,i)=>x[i?"lineTo":"moveTo"](q[0]*W,q[1]*H));x.stroke()});
+ x.lineCap="round";x.lineJoin="round";x.strokeStyle="#11427A";x.lineWidth=6;strokes.map(sp).forEach(s=>{x.beginPath();s.forEach((q,i)=>x[i?"lineTo":"moveTo"](q[0]*W,q[1]*H));x.stroke()});
  return new Promise(r=>c.toBlob(r,"image/png"))}
 // PDF: si stampa un documento che contiene SOLO il foglio (SVG + tratti a mano come tracciati vettoriali), in A4 orizzontale
-function strokeSvg(){return strokes.map(s=>'<path d="'+s.map((q,i)=>(i?"L":"M")+(q[0]*297).toFixed(2)+","+(q[1]*210).toFixed(2)).join("")+'" fill="none" stroke="#11427A" stroke-width=".6" stroke-linecap="round" stroke-linejoin="round"/>').join("")}
+function strokeSvg(){return strokes.map(sp).map(s=>'<path d="'+s.map((q,i)=>(i?"L":"M")+(q[0]*297).toFixed(2)+","+(q[1]*210).toFixed(2)).join("")+'" fill="none" stroke="#11427A" stroke-width=".6" stroke-linecap="round" stroke-linejoin="round"/>').join("")}
 const SHEET_CSS="@page{size:A4 landscape;margin:0}html,body{margin:0;padding:0;background:#fff;overflow:hidden}body>svg{display:block;width:100vw;height:100vh}";   // 100vw x 100vh: a 297 x 210 mm esatti Chrome manda il foglio in seconda pagina
 function sheetXml(){return new XMLSerializer().serializeToString($("svg")).replace(/<\/svg>\s*$/,strokeSvg()+"</svg>").replace(' id="svg"',"")}
 function sheetHtml(){return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><title>UTR Sketch · ${t("s_ys")}</title><style>${SHEET_CSS}</style></head><body>${sheetXml()}</body></html>`}
@@ -485,23 +647,36 @@ function printSheet(){const w=window.open("","_blank");if(!w){window.print();ret
 async function copyLink(){const l=link();const b=$("b-copy");let ok=false;try{await navigator.clipboard.writeText(l);ok=true}catch(e){try{const i=document.createElement("textarea");i.value=l;i.style.position="fixed";i.style.opacity="0";document.body.appendChild(i);i.select();ok=document.execCommand("copy");i.remove()}catch(e2){}}
  if(ok){b.textContent=t("copied");b.classList.add("on");setTimeout(()=>{b.textContent=t("copy");b.classList.remove("on")},2000)}else{try{window.prompt(t("copy_hint"),l)}catch(e){}}}
 async function savePng(){const b=await render();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="UTR_your_special_"+tool+".png";a.click()}
-async function shareIt(){const b=await render();const f=new File([b],"UTR_your_special_"+tool+".png",{type:"image/png"});const d={files:[f],title:"UTR Sketch",text:summary()};if(navigator.canShare&&navigator.canShare(d))await navigator.share(d).catch(()=>{});else sendMail()}
-if(navigator.canShare)$("b-share").style.display="";
-FIELDS.forEach(k=>$(k).addEventListener("input",()=>{save();draw()}));
+async function shareIt(){const b=await render();const f=new File([b],"UTR_your_special_"+tool+".png",{type:"image/png"});const d={files:[f],title:subject(),text:"info@utr.it\n\n"+summary()};if(navigator.canShare&&navigator.canShare(d))await navigator.share(d).catch(()=>{});else openMail()}
+function canShareFiles(){try{return !!(navigator.canShare&&navigator.canShare({files:[new File([""],"x.png",{type:"image/png"})]}))}catch(e){return false}}
+if(canShareFiles())$("b-share").style.display="";
+FIELDS.forEach(k=>$(k).addEventListener($(k).tagName==="SELECT"?"change":"input",()=>{pristine=false;save();draw();if(k==="f_note")noteCnt()}));
+// telefono: miniatura del pezzo in basso a destra quando il foglio è fuori vista (i cursori stanno 500 px sotto il disegno)
+document.addEventListener("focusin",e=>$("mini").classList.toggle("hidef",!!e.target.closest(".form")));document.addEventListener("focusout",()=>$("mini").classList.remove("hidef"));   // la miniatura non copre i campi mentre si scrive
+try{new IntersectionObserver(es=>es.forEach(e=>$("mini").classList.toggle("on",!e.isIntersecting&&e.boundingClientRect.top<0))).observe($("stage"))}catch(e){}
 window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="1.5 · 2026-10-05";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="1.6 · 2026-10-06";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 // RICARICA a prova di cache (5 ott 2026, «sul cellulare non si aggiorna»): ricarica con un parametro nuovo, così il browser non ripesca la copia di 10 minuti; senza ?tool la bozza (valori, tratti, dati) si ricarica da sola
 function freshReload(){const u=new URL(location.href);u.searchParams.set("r",Date.now());location.replace(u.toString())}
 async function checkUpdate(){if(!/^https?:$/.test(location.protocol))return;try{const r=await fetch(location.pathname,{cache:"no-store"});const m=(await r.text()).match(/const VERSION="([^"]+)"/);if(m&&m[1]!==VERSION)$("upd").classList.add("on")}catch(e){}}
 // ---------- avvio: indirizzo con parametri > bozza salvata > standard della brochure
-if(!fromUrl()){if(!load()){P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])}}
-else{const d=(()=>{try{return JSON.parse(localStorage.getItem("utr-sketch")||"null")}catch(e){return null}})();if(d&&d.f)FIELDS.forEach(k=>{if(d.f[k]!=null)$(k).value=d.f[k]})}
-sanitize();setTool(tool,true);setLang(lang);$("b-ghost").classList.add("on");$("ver").textContent="UTR Sketch v"+VERSION;
-try{if(!localStorage.getItem("utr-sketch-tut"))showTut()}catch(e){}setTimeout(checkUpdate,1500);
+// ---------- avvio (6 ott 2026): link con quote o #d= → quel lavoro (con i SUOI dati, mai quelli del browser che lo apre);
+// QR (?tool=… senza quote) o ricarica → la bozza salvata; QR di un altro utensile → il suo standard, la bozza resta a un ANNULLA
+buildSel();   // le tendine devono avere le opzioni prima di leggere bozza o link
+const U0=new URLSearchParams(location.search),H0=readHash(),T0=TOOLS[U0.get("tool")]?U0.get("tool"):null;
+const hasQ=!!T0&&(U0.has("std")||TOOLS[T0].params.some(p=>U0.has(p[0])));let startMsg=null,startHist=null;
+const stdP=()=>{P={};T_().params.forEach(p=>P[p[0]]=STD()[p[0]])};
+const draft0=(()=>{try{return JSON.parse(localStorage.getItem("utr-sketch")||"null")}catch(e){return null}})();
+if(hasQ||H0){if(draft0&&TOOLS[draft0.tool]&&draft0.P){startHist=JSON.stringify({tool:draft0.tool,stdIdx:Math.max(0,Math.min(parseInt(draft0.stdIdx)||0,TOOLS[draft0.tool].stds.length-1)),P:draft0.P,strokes:normStrokes(draft0.strokes),f:draft0.f||{}});startMsg="t_link"}pristine=true;fromUrl();if(!hasQ&&T0)tool=T0;if(!hasQ){stdIdx=0;stdP()}strokes=H0?decS(H0.s):[];FIELDS.forEach(k=>{$(k).value=H0&&H0.f&&typeof H0.f[k]==="string"?H0.f[k]:""})}
+else if(load()){const s0=stateStr();if(T0&&T0!==tool){startHist=JSON.stringify({...JSON.parse(s0),f:Object.fromEntries(FIELDS.map(k=>[k,$(k).value]))});pristine=true;tool=T0;stdIdx=0;stdP();strokes=[];startMsg="t_qr"}else{const S0=TOOLS[tool].stds[stdIdx];if(strokes.length||TOOLS[tool].params.some(p=>+P[p[0]]!==S0[p[0]]))startMsg="t_resume"}}
+else{if(T0)tool=T0;if(U0.get("lang"))lang=U0.get("lang")==="it"?"it":"en";stdP()}
+sanitize();setTool(tool,true);setLang(lang);$("b-ghost").classList.add("on");if(pristine&&(hasQ||H0))lastUrl="link";   // indirizzo del link tenuto finché non si cambia niente: ricaricando si rivede il link$("ver").textContent="UTR Sketch v"+VERSION;
+if(startHist){hist.push(startHist);$("b-undo").disabled=false}if(startMsg)setTimeout(()=>toast(t(startMsg),startHist?undo:null),400);
+try{if(!localStorage.getItem("utr-sketch-tut")&&!hasQ&&!H0)showTut()}catch(e){}   // chi apre un link (UTR, un collega) vede subito il fogliosetTimeout(checkUpdate,1500);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});   // anche quando si torna sulla scheda o si riapre dalla Home
 // ?print=1: la pagina diventa il solo foglio (per stampare da riga di comando o da un link)
 if(new URLSearchParams(location.search).has("print")){const xml=sheetXml();document.querySelectorAll("style").forEach(e=>e.remove());document.head.insertAdjacentHTML("beforeend","<style>"+SHEET_CSS+"</style>");document.body.innerHTML=xml}
