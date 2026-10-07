@@ -1,6 +1,9 @@
-# UTR Sketch — UTR Tiberti
+# UTR Sketch — UTR Tiberti Srl
 
-Pagina web per il cliente: parte da uno standard UTR (fresa torica HPC Z3 o fresa conica Z2·Z3), cambia i valori,
-il disegno quotato si rifà da solo; si aggiunge una nota a mano e si invia a UTR per e-mail (PDF e PNG del foglio).
-Raggiungibile dal QR di pagina 11 delle brochure: `?tool=torica` oppure `?tool=conica` (`&lang=it|en`).
-Un solo file, nessuna dipendenza. Il codice di lavoro sta nel repo di sviluppo (privato).
+IT · Configuratore di frese speciali UTR: si parte da uno standard (fresa torica HPC Z3 o fresa conica Z2·Z3),
+si cambiano le quote e si invia la richiesta d'offerta a UTR. Uso: https://utr-tiberti.github.io/sketch/
+
+EN · UTR special end mill configurator: start from a UTR standard (toric HPC Z3 or tapered Z2·Z3 end mill),
+change the dimensions and send the quotation request to UTR. Use: https://utr-tiberti.github.io/sketch/
+
+UTR Tiberti Srl · Via A. Bernocchi, 7 · 25069 Villa Carcina (BS) · Italy · info@utr.it · P.IVA 01580320172

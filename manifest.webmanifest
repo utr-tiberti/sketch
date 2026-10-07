@@ -1,7 +1,7 @@
 {
   "name": "UTR Sketch — UTR Tiberti",
   "short_name": "UTR Sketch",
-  "description": "Your special is our standard: start from a UTR endmill, change the values, send us your sketch.",
+  "description": "Your special is our standard: start from a UTR end mill, change the values, send us your sketch.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
