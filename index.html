@@ -29,6 +29,7 @@ main{max-width:1240px;margin:0 auto;padding:16px}
 .lead{color:var(--mid);font-size:14px;margin:0 0 18px;max-width:760px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:1fr}}
+.grid>section.stick{position:sticky;top:8px}   /* due colonne (iPad orizzontale, PC): il disegno resta fermo, scorre solo il pannello di destra (richiesta utente 11 ott 2026) */
 .card{background:#fff;border:1px solid var(--line)}
 .card h2{font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--navy);margin:0;padding:10px 14px;border-bottom:1px solid var(--line)}
 .stage{position:relative;background:#fff}
@@ -154,7 +155,8 @@ button,input,select,textarea{font-family:inherit}
   main{max-width:none;padding:0;margin:0}
   .grid{display:block}
   .card{border:0}
-  .stage{width:297mm;height:210mm;background:#fff}
+  .stage{width:297mm;height:210mm;background:#fff;max-width:none!important}
+  .grid>section{position:static!important}
 }
 </style>
 </head>
@@ -736,10 +738,11 @@ FIELDS.forEach(k=>$(k).addEventListener($(k).tagName==="SELECT"?"change":"input"
 // telefono: miniatura del pezzo in basso a destra quando il foglio è fuori vista (i cursori stanno 500 px sotto il disegno)
 document.addEventListener("focusin",e=>$("mini").classList.toggle("hidef",!!e.target.closest(".form")));document.addEventListener("focusout",()=>$("mini").classList.remove("hidef"));   // la miniatura non copre i campi mentre si scrive
 try{new IntersectionObserver(es=>es.forEach(e=>{if(!$("mini"))return;$("mini").classList.toggle("on",!e.isIntersecting&&e.boundingClientRect.top<0);if(!e.isIntersecting&&penOn){togglePen();toast(t("t_penoff"))}})).observe($("stage"))}catch(e){}   // la penna si spegne quando il foglio esce dalla vista: scorrendo il modulo non si disegna per sbaglio
-window.addEventListener("resize",fitPen);window.addEventListener("beforeprint",fitPen);
+function stickFit(){const st=$("stage"),sec=st.closest("section");st.style.maxWidth="";st.style.margin="";sec.classList.remove("stick");if(innerWidth<=900)return;const other=sec.offsetHeight-st.offsetHeight,room=innerHeight-16-other;if(room<260){fitPen();return}if(st.offsetWidth*210/297>room){st.style.maxWidth=Math.floor(room*297/210)+"px";st.style.margin="0 auto"}sec.classList.add("stick");fitPen()}   // il foglio si rimpicciolisce quanto basta perché disegno e pulsanti stiano nello schermo; finestra troppo bassa: niente blocco
+addEventListener("resize",stickFit);addEventListener("orientationchange",()=>setTimeout(stickFit,300));setTimeout(stickFit,0);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="2.2 · 2026-10-11";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="2.3 · 2026-10-11";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 // RICARICA a prova di cache (5 ott 2026, «sul cellulare non si aggiorna»): ricarica con un parametro nuovo, così il browser non ripesca la copia di 10 minuti; senza ?tool la bozza (valori, tratti, dati) si ricarica da sola
