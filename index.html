@@ -741,7 +741,7 @@ async function render(){const xml=new XMLSerializer().serializeToString($("svg")
  return new Promise(r=>c.toBlob(r,"image/png"))}
 // PDF: si stampa un documento che contiene SOLO il foglio (SVG + tratti a mano come tracciati vettoriali), in A4 orizzontale
 function strokeSvg(){return strokes.map(sp).map(s=>'<path d="'+s.map((q,i)=>(i?"L":"M")+(q[0]*297).toFixed(2)+","+(q[1]*210).toFixed(2)).join("")+'" fill="none" stroke="#11427A" stroke-width=".6" stroke-linecap="round" stroke-linejoin="round"/>').join("")}
-const SHEET_CSS="@page{size:A4 landscape;margin:0}html,body{margin:0;padding:0;background:#fff;overflow:hidden;width:297mm;height:209.9mm}body>svg{display:block;width:297mm;height:209.9mm}";   // misure fisse 297 x 209,9 mm: con 100vw x 100vh Safari (WebKit) stampava il foglio ingrandito del 6,7 % e tagliato, su due pagine (13 ott 2026); 210 mm esatti mandavano Chrome in seconda pagina
+const SHEET_CSS="@page{size:A4 landscape;margin:0}html,body{margin:0;padding:0;background:#fff}body>svg{display:block;width:100vw;height:auto;max-height:100vh;margin:0 auto}@media print{html,body{overflow:hidden;width:297mm;height:209.9mm}body>svg{width:297mm;height:209.9mm;max-height:none}}";   // a schermo il foglio riempie la finestra (anche sul telefono); in stampa misure fisse 297 x 209,9 mm: con 100vw x 100vh Safari (WebKit) stampava il foglio ingrandito del 6,7 % e tagliato, su due pagine (13 ott 2026); 210 mm esatti mandavano Chrome in seconda pagina
 function sheetXml(){return new XMLSerializer().serializeToString($("svg")).replace(/<\/svg>\s*$/,strokeSvg()+"</svg>").replace(' id="svg"',"")}
 function sheetHtml(){return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"><title>${fileBase()}</title><style>${SHEET_CSS}</style></head><body>${sheetXml()}</body></html>`}
 function printSheet(){ensureCode();const w=window.open("","_blank");if(!w){window.print();return}w.document.open();w.document.write(sheetHtml());w.document.close();w.focus();setTimeout(()=>{w.print()},500)}
@@ -763,7 +763,7 @@ function stickFit(){const st=$("stage");if(!st)return;const sec=st.closest("sect
 addEventListener("resize",stickFit);addEventListener("orientationchange",()=>setTimeout(stickFit,300));setTimeout(stickFit,0);window.addEventListener("beforeprint",fitPen);
 
 // ---------- versione, guida breve, controllo aggiornamento
-const VERSION="2.4 · 2026-10-13";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
+const VERSION="2.5 · 2026-10-14";   // cambiarla a ogni pubblicazione: chi ha la pagina aperta vede la striscia «nuova versione»
 function showTut(){$("tut").classList.add("on")}
 function hideTut(){$("tut").classList.remove("on");try{localStorage.setItem("utr-sketch-tut","1")}catch(e){}}
 // RICARICA a prova di cache (5 ott 2026, «sul cellulare non si aggiorna»): ricarica con un parametro nuovo, così il browser non ripesca la copia di 10 minuti; senza ?tool la bozza (valori, tratti, dati) si ricarica da sola
